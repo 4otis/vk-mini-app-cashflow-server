@@ -1,50 +1,97 @@
 package handlers
 
 import (
-	"math/rand"
 	"net/http"
 
-	"github.com/4otis/vk-mini-app-cashflow-server/internal/models"
+	"github.com/4otis/vk-mini-app-cashflow-server/internal/dto"
+	"github.com/4otis/vk-mini-app-cashflow-server/internal/services"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-func generateSessionID() string {
-	var letters = []rune("abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
-	seqLen := 16
-	out := make([]rune, seqLen)
-
-	for i := range out {
-		out[i] = letters[rand.Intn(len(letters))]
-	}
-	return string(out)
+type SessionHandler struct {
+	sessionService *services.SessionService
 }
 
-func CreateSession(db *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
-		sessionID := generateSessionID()
-
-		session := models.Session{
-			ID:       sessionID,
-			IsActive: false,
-		}
-
-		err := db.Create(&session).Error
-		if err != nil {
-			c.JSON(http.StatusInternalServerError, gin.H{"error": "ERROR. Не удалось создать сессию"})
-			return
-		}
-
-		c.JSON(http.StatusOK, gin.H{
-			"session_id": sessionID,
-			"join_link":  "http://vk.com/app123#/join/" + sessionID,
-		})
-
+func NewSessionHandler(sessionService *services.SessionService) *SessionHandler {
+	return &SessionHandler{
+		sessionService: sessionService,
 	}
 }
 
-func JoinSession(db *gorm.DB) gin.HandlerFunc {
-	return func(c *gin.Context) {
+func (h *SessionHandler) CreateSession(c *gin.Context) {
+	var req dto.CreatePlayerRequest
+	// if err := c.ShouldBindJSON(&req); err != nil {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+	// 	return
+	// }
 
+	vkID, _ := c.Get("vk_id")
+	// if !exists {
+	// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
+	// 	return
+	// }
+
+	resp, err := h.sessionService.CreateSession(c.Request.Context(), vkID.(int), req.Nickname)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
 	}
+
+	c.JSON(http.StatusCreated, resp)
+}
+
+func (h *SessionHandler) JoinSession(c *gin.Context) {
+	code := c.Param("code")
+	if len(code) != 6 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session code format"})
+		return
+	}
+
+	var req dto.CreatePlayerRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	vkID, exists := c.Get("vk_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
+		return
+	}
+
+	player, err := h.sessionService.JoinSession(c.Request.Context(), code, vkID.(int), req.Nickname)
+	if err != nil {
+		switch err {
+		case services.ErrSessionNotFound:
+			c.JSON(http.StatusNotFound, gin.H{"error": "session not found"})
+		case services.ErrInvalidCode:
+			c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session code"})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, player)
+}
+
+func (h *SessionHandler) GetSessionPlayers(c *gin.Context) {
+	code := c.Param("code")
+	if len(code) != 6 {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session code format"})
+		return
+	}
+
+	players, err := h.sessionService.GetSessionPlayers(c.Request.Context(), code)
+	if err != nil {
+		switch err {
+		case services.ErrSessionNotFound:
+			c.JSON(http.StatusNotFound, gin.H{"error": "session not found"})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, players)
 }

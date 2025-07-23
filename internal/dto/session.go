@@ -5,3 +5,7 @@ type CreateSessionResponse struct {
 	JoinLink string `json:"join_link"`
 	// Players  []PlayerResponse `json:"players"`
 }
+
+type JoinSessionRequest struct {
+	Code string `json:"code"`
+}

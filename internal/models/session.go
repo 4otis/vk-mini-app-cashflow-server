@@ -4,18 +4,9 @@ import "gorm.io/gorm"
 
 type Session struct {
 	gorm.Model
-	ID          string `gorm:"uniqueIndex"`
-	Players     []Player
-	IsActive    bool
+	Code        string   `gorm:"uniqueIndex;size:8"`
+	Players     []Player `gorm:"foreignKey:SessionID"`
+	IsActive    bool     `gorm:"default:false"`
 	CurrentTurn uint
-}
-
-type Player struct {
-	gorm.Model
-	SessionID string
-	VKID      uint `gorm:"index"`
-	Nickname  string
-	Ready     bool
-	Balance   int `gorm:"default:1000"`
-	Position  int `gorm:"default:0"`
+	// CreatorID   uint
 }

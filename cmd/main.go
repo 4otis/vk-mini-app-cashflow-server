@@ -3,49 +3,59 @@ package main
 import (
 	"log"
 	"os"
+	"time"
 
+	"github.com/4otis/vk-mini-app-cashflow-server/internal/config"
+	"github.com/4otis/vk-mini-app-cashflow-server/internal/handlers"
 	"github.com/4otis/vk-mini-app-cashflow-server/internal/models"
+	"github.com/4otis/vk-mini-app-cashflow-server/internal/repository"
+	"github.com/4otis/vk-mini-app-cashflow-server/internal/services"
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
 func main() {
-	// Инициализация БД
-	db, err := config.InitDB()
+	// Инициализация базы данных
+	db, err := config.InitDB(config.Load().DB)
 	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
+		log.Fatal("Database connection error:", err)
 	}
 
 	// Автомиграции
-	db.AutoMigrate(&models.Session{}, &models.Player{})
+	if err := db.AutoMigrate(&models.Session{}, &models.Player{}); err != nil {
+		log.Fatal("Migration failed:", err)
+	}
 
-	// Создание сервера Gin
-	r := gin.Default()
+	// Инициализация зависимостей
+	sessionRepo := repository.NewSessionRepository(db)
+	playerRepo := repository.NewPlayerRepository(db)
+	sessionService := services.NewSessionService(sessionRepo, playerRepo)
+	sessionHandler := handlers.NewSessionHandler(sessionService)
 
-	// Регистрация роутов
-	registerAPIRoutes(r, db)
+	// Создание роутера
+	router := gin.Default()
 
+	router.StaticFile("/", "./index.html")           // Для корневого пути
+	router.StaticFile("/index.html", "./index.html") // Явно для index.html
+
+	// Маршруты
+	router.POST("/sessions", sessionHandler.CreateSession)
+	router.POST("/sessions/:code/join", sessionHandler.JoinSession)
+	router.GET("/sessions/:code/players", sessionHandler.GetSessionPlayers)
+
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:*", "https://vk.com"},
+		AllowMethods:     []string{"GET", "POST"},
+		AllowHeaders:     []string{"Origin", "Content-Type"},
+		ExposeHeaders:    []string{"Content-Length"},
+		AllowCredentials: true,
+		MaxAge:           12 * time.Hour,
+	}))
 	// Запуск сервера
-	port := os.Getenv("SERVER_PORT")
+	port := os.Getenv("PORT")
 	if port == "" {
 		port = "8080"
 	}
-	r.Run(":" + port)
-}
-
-func registerAPIRoutes(r *gin.Engine, db *gorm.DB) {
-	// Группа роутов для сессий
-	sessionGroup := r.Group("/session")
-	{
-		sessionGroup.POST("/create", handlers.CreateSession(db))
-		sessionGroup.POST("/join", handlers.JoinSession(db))
-	}
-
-	// Группа роутов для игры
-	gameGroup := r.Group("/cashflow/:id")
-	{
-		gameGroup.GET("/players", handlers.GetPlayers(db))
-		gameGroup.POST("/ready", handlers.ToggleReady(db))
-		gameGroup.POST("/move", handlers.MakeMove(db))
-	}
+	log.Printf("Server running on port %s", port)
+	log.Fatal(router.Run(":" + port))
 }

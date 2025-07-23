@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cashflow Game</title>
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <!-- <script src="https://vk.com/js/api/openapi.js?169"></script> -->
+   <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      padding: 20px;
+      background-color: #f5f5f5;
+      text-align: center;
+    }
+    .container {
+      max-width: 400px;
+      margin: 0 auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    h1 {
+      color: #5181b8;
+    }
+    button {
+      padding: 12px 24px;
+      margin: 10px;
+      background-color: #5181b8;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      font-size: 16px;
+      width: 80%;
+      transition: background-color 0.3s;
+    }
+    button:hover {
+      background-color: #3a6ea5;
+    }
+    button.secondary {
+      background-color: #6c757d;
+    }
+    button.secondary:hover {
+      background-color: #5a6268;
+    }
+    input {
+      padding: 10px;
+      margin: 10px 0;
+      width: 80%;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+    .error {
+      color: #dc3545;
+      margin: 10px 0;
+    }
+  </style>
+</head>
+<body>
+  <div id="app">
+    <div class="container">
+      <script>
+  vkBridge.send("VKWebAppInit", {});
+</script>
+      <h1>Cashflow Game</h1>
+      
+      <div v-if="!sessionCode && !showJoinForm">
+        <button @click="startNewGame">Начать играть</button>
+        <button class="secondary" @click="showJoinForm = true">Подключиться</button>
+      </div>
+      
+      <div v-if="showJoinForm && !sessionCode">
+        <h3>Подключиться к игре</h3>
+        <input v-model="joinCode" placeholder="Введите код игры">
+        <button @click="joinGame">Присоединиться</button>
+        <button class="secondary" @click="showJoinForm = false">Назад</button>
+        <p class="error" v-if="joinError">{{ joinError }}</p>
+      </div>
+      
+      <div v-if="sessionCode">
+        <p>Код игры: <strong>{{ sessionCode }}</strong></p>
+        <button @click="getPlayers">Обновить список игроков</button>
+        <div v-if="players.length > 0">
+          <h3>Игроки в сессии:</h3>
+          <ul style="list-style: none; padding: 0;">
+            <li v-for="player in players" :key="player.id" 
+                style="padding: 8px; margin: 5px; background: #f8f9fa; border-radius: 4px;">
+              {{ player.nickname }} (ID: {{ player.vk_id }})
+            </li>
+          </ul>
+        </div>
+        <p class="error" v-if="errorMessage">{{ errorMessage }}</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+  const { createApp, ref, onMounted } = Vue;
+  
+  
+  createApp({
+    setup() {
+      const sessionCode = ref(null);
+      const players = ref([]);
+      const vkId = ref('user_' + Math.floor(Math.random() * 1000));
+      const isLoading = ref(false);
+      const errorMessage = ref('');
+      const showJoinForm = ref(false);
+      const joinCode = ref('');
+      const joinError = ref('');
+      const isVK = ref(false);
+
+      // Проверяем, находимся ли мы внутри VK Mini App
+      onMounted(() => {
+        if (typeof VK !== 'undefined' && VK.WebApp) {
+          isVK.value = true;
+          VK.WebApp.init()
+            .then(() => VK.WebApp.getUserInfo())
+            .then(user => {
+              vkId.value = user.id;
+            })
+            .catch(err => {
+              console.error('VK init error:', err);
+              vkId.value = 'vk_guest_' + Math.floor(Math.random() * 1000);
+            });
+        }
+      });
+
+        const startNewGame = async () => {
+          isLoading.value = true;
+          errorMessage.value = '';
+          
+          try {
+            const response = await fetch('http://localhost:8080/sessions', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                vk_id: vkId.value, 
+                nickname: "player1"
+              })
+            });
+            
+            if (!response.ok) throw new Error('Ошибка сервера');
+            
+            const data = await response.json();
+            sessionCode.value = data.code;
+          } catch (err) {
+            errorMessage.value = 'Ошибка при создании игры: ' + err.message;
+          } finally {
+            isLoading.value = false;
+          }
+        };
+
+        const joinGame = async () => {
+          if (!joinCode.value.trim()) {
+            joinError.value = 'Введите код игры';
+            return;
+          }
+          
+          isLoading.value = true;
+          joinError.value = '';
+          
+          try {
+            const response = await fetch(`http://localhost:8080/sessions/${joinCode.value}/join`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                vk_id: vkId.value, 
+                nickname: 'Игрок_' + vkId.value.toString().slice(-4)
+              })
+            });
+            
+            if (!response.ok) {
+              const error = await response.json();
+              throw new Error(error.message || 'Не удалось подключиться');
+            }
+            
+            const data = await response.json();
+            sessionCode.value = joinCode.value;
+            players.value = data.players || [];
+          } catch (err) {
+            joinError.value = err.message;
+          } finally {
+            isLoading.value = false;
+          }
+        };
+
+        const getPlayers = async () => {
+          if (!sessionCode.value) return;
+          
+          try {
+            const response = await fetch(`http://localhost:8080/sessions/${sessionCode.value}/players`);
+            players.value = await response.json();
+          } catch (err) {
+            errorMessage.value = 'Ошибка при загрузке игроков';
+          }
+        };
+
+        return { 
+          sessionCode, players, startNewGame, joinGame, getPlayers,
+          isLoading, errorMessage, showJoinForm, joinCode, joinError
+        };
+      }
+    }).mount('#app');
+  </script>
+</body>
+</html>
