@@ -27,6 +27,7 @@ func main() {
 	//_ = sessionHandler
 	// // Создание роутера
 	router := gin.Default()
+	_ = router
 
 	// router.StaticFile("/", "./index.html")           // Для корневого пути
 	// router.StaticFile("/index.html", "./index.html") // Явно для index.html
