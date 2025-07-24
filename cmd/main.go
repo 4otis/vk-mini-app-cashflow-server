@@ -22,6 +22,14 @@ func main() {
 	}
 
 	// Автомиграции
+	if err := db.Migrator().DropTable(
+		&models.Session{},
+		&models.Player{},
+		// Добавьте другие модели...
+	); err != nil {
+		log.Fatal("Failed to drop all tables:", err)
+	}
+
 	if err := db.AutoMigrate(&models.Session{}, &models.Player{}); err != nil {
 		log.Fatal("Migration failed:", err)
 	}
