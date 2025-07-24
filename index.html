@@ -137,11 +137,14 @@
           errorMessage.value = '';
           
           try {
+            const user = await vkBridge.send('VKWebAppGetUserInfo');
+            console.log('VK ID:', user.id);
+
             const response = await fetch('/sessions', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
-                vk_id: vkId.value, 
+                vk_id: user.id, 
                 nickname: "player1"
               })
             });
@@ -167,7 +170,7 @@
           joinError.value = '';
           
           try {
-            const response = await fetch(`http://localhost:8080/sessions/${joinCode.value}/join`, {
+            const response = await fetch(`/sessions/${joinCode.value}/join`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
@@ -195,7 +198,7 @@
           if (!sessionCode.value) return;
           
           try {
-            const response = await fetch(`http://localhost:8080/sessions/${sessionCode.value}/players`);
+            const response = await fetch(`/sessions/${sessionCode.value}/players`);
             players.value = await response.json();
           } catch (err) {
             errorMessage.value = 'Ошибка при загрузке игроков';
