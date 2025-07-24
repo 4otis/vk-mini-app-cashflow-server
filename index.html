@@ -170,11 +170,14 @@
           joinError.value = '';
           
           try {
+            const user = await vkBridge.send('VKWebAppGetUserInfo');
+            console.log('VK ID:', user.id);
+
             const response = await fetch(`/sessions/${joinCode.value}/join`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
-                vk_id: vkId.value, 
+                vk_id: user.id, 
                 nickname: 'Игрок_' + vkId.value.toString().slice(-4)
               })
             });
