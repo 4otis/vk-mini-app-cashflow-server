@@ -60,11 +60,14 @@
   </style>
 </head>
 <body>
+  <script>
+  vkBridge.send("VKWebAppInit", {});
+  </script>
+
+  
   <div id="app">
     <div class="container">
-      <script>
-  vkBridge.send("VKWebAppInit", {});
-</script>
+
       <h1>Cashflow Game</h1>
       
       <div v-if="!sessionCode && !showJoinForm">

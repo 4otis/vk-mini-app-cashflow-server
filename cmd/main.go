@@ -32,7 +32,6 @@ func main() {
 	sessionService := services.NewSessionService(sessionRepo, playerRepo)
 	sessionHandler := handlers.NewSessionHandler(sessionService)
 
-	//_ = sessionHandler
 	// // Создание роутера
 	router := gin.Default()
 	_ = router
@@ -46,8 +45,8 @@ func main() {
 	router.GET("/sessions/:code/players", sessionHandler.GetSessionPlayers)
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:*", "https://vk.com"},
-		AllowMethods:     []string{"GET", "POST"},
+		AllowOrigins:     []string{"https://cshflw.ru", "https://vk.com"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "UPDATE", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},
 		AllowCredentials: true,
@@ -60,5 +59,4 @@ func main() {
 	}
 	log.Printf("Server running on port %s", port)
 	log.Fatal(router.Run(":" + port))
-	log.Printf("Test!")
 }
