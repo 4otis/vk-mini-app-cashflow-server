@@ -64,7 +64,7 @@
   vkBridge.send("VKWebAppInit", {});
   </script>
 
-  
+
   <div id="app">
     <div class="container">
 
@@ -137,7 +137,7 @@
           errorMessage.value = '';
           
           try {
-            const response = await fetch('http://localhost:8080/sessions', {
+            const response = await fetch('/sessions', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
