@@ -55,13 +55,12 @@ func (h *SessionHandler) JoinSession(c *gin.Context) {
 		return
 	}
 
-	vkID, exists := c.Get("vk_id")
-	if !exists {
+	if req.VKID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
 		return
 	}
 
-	player, err := h.sessionService.JoinSession(c.Request.Context(), code, vkID.(int), req.Nickname)
+	player, err := h.sessionService.JoinSession(c.Request.Context(), code, req.VKID, req.Nickname)
 	if err != nil {
 		switch err {
 		case services.ErrSessionNotFound:
@@ -79,10 +78,10 @@ func (h *SessionHandler) JoinSession(c *gin.Context) {
 
 func (h *SessionHandler) GetSessionPlayers(c *gin.Context) {
 	code := c.Param("code")
-	if len(code) != 6 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session code format"})
-		return
-	}
+	// if len(code) != 6 {
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session code format"})
+	// 	return
+	// }
 
 	players, err := h.sessionService.GetSessionPlayers(c.Request.Context(), code)
 	if err != nil {
