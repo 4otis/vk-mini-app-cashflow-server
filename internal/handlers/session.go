@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/4otis/vk-mini-app-cashflow-server/internal/dto"
@@ -21,6 +22,7 @@ func NewSessionHandler(sessionService *services.SessionService) *SessionHandler 
 func (h *SessionHandler) CreateSession(c *gin.Context) {
 	var req dto.CreatePlayerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
+		log.Printf("ERROR. BadRequest: (VKID=%d; Nickname=%s)\n", req.VKID, req.Nickname)
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
