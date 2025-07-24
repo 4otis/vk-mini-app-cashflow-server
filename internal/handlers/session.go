@@ -43,10 +43,11 @@ func (h *SessionHandler) CreateSession(c *gin.Context) {
 
 func (h *SessionHandler) JoinSession(c *gin.Context) {
 	code := c.Param("code")
-	if len(code) != 6 {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session code format"})
-		return
-	}
+	// if len(code) !=  {
+	// 	log.Printf("code: %v\n", code)
+	// 	c.JSON(http.StatusBadRequest, gin.H{"error": "invalid session code format"})
+	// 	return
+	// }
 
 	var req dto.CreatePlayerRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
