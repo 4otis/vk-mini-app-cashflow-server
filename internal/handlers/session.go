@@ -27,13 +27,12 @@ func (h *SessionHandler) CreateSession(c *gin.Context) {
 		return
 	}
 
-	vkID, exists := c.Get("vk_id")
-	if !exists {
+	if req.VKID == 0 {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
 		return
 	}
 
-	resp, err := h.sessionService.CreateSession(c.Request.Context(), vkID.(int), req.Nickname)
+	resp, err := h.sessionService.CreateSession(c.Request.Context(), req.VKID, req.Nickname)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
