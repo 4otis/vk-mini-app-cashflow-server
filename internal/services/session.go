@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/4otis/vk-mini-app-cashflow-server/internal/dto"
@@ -70,7 +71,7 @@ func (s *SessionService) CreateSession(ctx context.Context, creatorVKID int, nic
 
 	return &dto.CreateSessionResponse{
 		Code:     session.Code,
-		JoinLink: fmt.Sprintf("/join/%s", session.ID),
+		JoinLink: fmt.Sprintf("/join/%s", strconv.Itoa((int(session.ID)))),
 	}, nil
 }
 

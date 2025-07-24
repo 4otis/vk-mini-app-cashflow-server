@@ -20,16 +20,16 @@ func NewSessionHandler(sessionService *services.SessionService) *SessionHandler 
 
 func (h *SessionHandler) CreateSession(c *gin.Context) {
 	var req dto.CreatePlayerRequest
-	// if err := c.ShouldBindJSON(&req); err != nil {
-	// 	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-	// 	return
-	// }
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
 
-	vkID, _ := c.Get("vk_id")
-	// if !exists {
-	// 	c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
-	// 	return
-	// }
+	vkID, exists := c.Get("vk_id")
+	if !exists {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": "authentication required"})
+		return
+	}
 
 	resp, err := h.sessionService.CreateSession(c.Request.Context(), vkID.(int), req.Nickname)
 	if err != nil {
