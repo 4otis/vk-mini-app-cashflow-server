@@ -19,7 +19,7 @@ func (r SessionRepository) Create(session *models.Session) error {
 
 func (r SessionRepository) Read(code string) (*models.Session, error) {
 	var session models.Session
-	err := r.db.Where("id = ?", code).First(&session).Error
+	err := r.db.Where("code = ?", code).First(&session).Error
 	if err != nil {
 		return nil, err
 	}
