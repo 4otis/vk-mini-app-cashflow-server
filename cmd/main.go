@@ -45,7 +45,7 @@ func main() {
 	router.GET("/sessions/:code/players", sessionHandler.GetSessionPlayers)
 
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"https://cshflw.ru", "https://vk.com"},
+		AllowOrigins:     []string{"https://cshflw.ru/*", "https://vk.com"},
 		AllowMethods:     []string{"GET", "POST", "PUT", "UPDATE", "DELETE"},
 		AllowHeaders:     []string{"Origin", "Content-Type"},
 		ExposeHeaders:    []string{"Content-Length"},
