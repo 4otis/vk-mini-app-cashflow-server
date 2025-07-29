@@ -211,8 +211,11 @@
 
         const playerReady = async () => {
           if (!sessionCode.value) return;
-
+          
+          isLoading.value = true;
+          
           try {
+            const user = await vkBridge.send('VKWebAppGetUserInfo');
             const response = await fetch(`/game/${sessionCode.value}/ready`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
