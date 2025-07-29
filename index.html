@@ -224,8 +224,7 @@
               })
             });
           
-            const data = await response.json();
-            players.value = data.players || [];
+            players.value = await response.json();
           } catch {
             errorMessage.value = 'Ошибка при отправке статуса готовности';
           } finally {
