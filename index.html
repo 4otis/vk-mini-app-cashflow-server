@@ -91,9 +91,10 @@
           <ul style="list-style: none; padding: 0;">
             <li v-for="player in players" :key="player.id" 
                 style="padding: 8px; margin: 5px; background: #f8f9fa; border-radius: 4px;">
-              {{ player.nickname }} (ID: {{ player.vk_id }})
+              {{ player.nickname }} (ID: {{ player.vk_id }}) {{ player.ready ? "Готов" : "Не готов" }}
             </li>
           </ul>
+        <button @click="playerReady">Готов</button>
         </div>
         <p class="error" v-if="errorMessage">{{ errorMessage }}</p>
       </div>
@@ -207,6 +208,25 @@
             errorMessage.value = 'Ошибка при загрузке игроков';
           }
         };
+
+        const playerReady = async () => {
+          if (!sessionCode.value) return;
+
+          try {
+            const response = await fetch(`/game/${sessionCode.value}/ready`, {
+              method: 'UPDATE',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                vk_id: user.id
+              })
+            });
+          
+            const data = await response.json();
+            players.value = data.players || [];
+          } catch {
+            errorMessage.value = 'Ошибка при отправке статуса готовности';
+          }
+        }
 
         return { 
           sessionCode, players, startNewGame, joinGame, getPlayers,

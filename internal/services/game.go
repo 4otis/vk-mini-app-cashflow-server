@@ -1,0 +1,63 @@
+package services
+
+import (
+	"context"
+	"fmt"
+	"log"
+
+	"github.com/4otis/vk-mini-app-cashflow-server/internal/dto"
+	"github.com/4otis/vk-mini-app-cashflow-server/internal/repository"
+)
+
+type GameService struct {
+	sessionRepo repository.SessionRepository
+	playerRepo  repository.PlayerRepository
+}
+
+func NewGameService(sessionRepo *repository.SessionRepository, playerRepo *repository.PlayerRepository) *GameService {
+	return &GameService{
+		sessionRepo: *sessionRepo,
+		playerRepo:  *playerRepo,
+	}
+}
+
+func (s *GameService) TryStartGame(ctx context.Context, code string, VKID int) ([]dto.PlayerResponse, error) {
+	session, err := s.sessionRepo.Read(code)
+	if err != nil {
+		return nil, fmt.Errorf("failed to get session: %w", err)
+	}
+
+	player, err := s.playerRepo.Read(uint(VKID))
+	if err != nil {
+		return nil, fmt.Errorf("failed to get player: %w", err)
+	}
+
+	s.playerRepo.UpdateFields(uint(VKID), map[string]interface{}{
+		"ready": !player.Ready,
+	})
+	players, err := s.playerRepo.ReadAll(session.ID)
+	if err != nil {
+
+	}
+
+	if !player.Ready {
+
+		for _, pl := range players {
+			if !pl.Ready {
+				break
+			}
+		}
+
+		log.Printf("ALL PLAYERS ARE READY!!!")
+		log.Printf("ALL PLAYERS ARE READY!!!")
+		log.Printf("ALL PLAYERS ARE READY!!!")
+
+	}
+
+	result := make([]dto.PlayerResponse, 0, len(players))
+	for _, p := range players {
+		result = append(result, *convertPlayerToDTO(&p))
+	}
+
+	return result, nil
+}
