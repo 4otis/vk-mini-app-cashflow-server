@@ -225,6 +225,8 @@
             players.value = data.players || [];
           } catch {
             errorMessage.value = 'Ошибка при отправке статуса готовности';
+          } finally {
+            isLoading.value = false;
           }
         }
 
