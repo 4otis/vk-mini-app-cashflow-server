@@ -59,7 +59,7 @@ func (s *SessionService) CreateSession(ctx context.Context, creatorVKID int, nic
 		VKID:      creatorVKID,
 		SessionID: session.ID,
 		Nickname:  nickname,
-		Ready:     true,
+		Ready:     false,
 		Balance:   10000, // Starting balance
 	}
 
