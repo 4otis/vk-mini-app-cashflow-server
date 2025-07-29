@@ -168,7 +168,7 @@
         <p class="error" v-if="joinError">{{ joinError }}</p>
       </div>
       
-      <div v-if="sessionCode">
+      <div v-if="sessionCode && !gameStarted">
         <p>Код игры: <strong>{{ sessionCode }}</strong></p>
         <button @click="getPlayers">Обновить список игроков</button>
         <div v-if="players.length > 0">
