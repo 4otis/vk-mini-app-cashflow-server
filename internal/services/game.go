@@ -32,9 +32,12 @@ func (s *GameService) TryStartGame(ctx context.Context, code string, VKID int) (
 		return nil, fmt.Errorf("failed to get player: %w", err)
 	}
 
-	s.playerRepo.UpdateFields(uint(VKID), map[string]interface{}{
+	err = s.playerRepo.UpdateFields(player.ID, map[string]interface{}{
 		"ready": !player.Ready,
 	})
+	if err != nil {
+		return nil, fmt.Errorf("failed to update player: %w", err)
+	}
 	players, err := s.playerRepo.ReadAll(session.ID)
 	if err != nil {
 
