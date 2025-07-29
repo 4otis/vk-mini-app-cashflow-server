@@ -22,6 +22,11 @@ func (r PlayerRepository) Read(id uint) (player *models.Player, err error) {
 	return player, err
 }
 
+func (r PlayerRepository) ReadByVKID(vkID int) (player *models.Player, err error) {
+	err = r.db.Where("vk_id = ?", vkID).First(&player).Error
+	return player, err
+}
+
 func (r PlayerRepository) ReadAll(sessionID uint) ([]models.Player, error) {
 	var players []models.Player
 	err := r.db.Where("session_id = ?", sessionID).Find(&players).Error

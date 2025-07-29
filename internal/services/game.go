@@ -27,7 +27,7 @@ func (s *GameService) TryStartGame(ctx context.Context, code string, VKID int) (
 		return nil, fmt.Errorf("failed to get session: %w", err)
 	}
 
-	player, err := s.playerRepo.Read(uint(VKID))
+	player, err := s.playerRepo.ReadByVKID(VKID)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get player: %w", err)
 	}
