@@ -12,12 +12,16 @@ import (
 type GameService struct {
 	sessionRepo repository.SessionRepository
 	playerRepo  repository.PlayerRepository
+	assetRepo   repository.AssetRepository
 }
 
-func NewGameService(sessionRepo *repository.SessionRepository, playerRepo *repository.PlayerRepository) *GameService {
+func NewGameService(sessionRepo *repository.SessionRepository,
+	playerRepo *repository.PlayerRepository,
+	assetRepo *repository.AssetRepository) *GameService {
 	return &GameService{
 		sessionRepo: *sessionRepo,
 		playerRepo:  *playerRepo,
+		assetRepo:   *assetRepo,
 	}
 }
 

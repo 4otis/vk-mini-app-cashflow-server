@@ -18,3 +18,18 @@ type PlayerResponse struct {
 	Balance       float64 `json:"balance"`
 	BankLoan      float64 `json:"bank_loan"`
 }
+
+type PlayerStat struct {
+	VKID          int         `json:"vk_id"`
+	Nickname      string      `json:"nickname"`
+	PassiveIncome int         `json:"passive_income"`
+	TotalIncome   int         `json:"total_income"`
+	TotalExpenses int         `json:"total_expenses"`
+	Cashflow      int         `json:"cashflow"`
+	Position      int         `json:"position"`
+	Assets        []AssetStat `json:"assets"`
+	Balance       int         `json:"balance"`
+	// Liabilities   []Liability `json:"liabilities"`
+	// IsBankrupt    bool        `json:"is_bankrupt"`
+	// Children      int         `json:"children"`
+}

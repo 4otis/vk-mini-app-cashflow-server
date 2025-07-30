@@ -14,9 +14,10 @@ func SetupRoutes(g *gin.Engine, db *gorm.DB) {
 	// Инициализация зависимостей
 	sessionRepo := repository.NewSessionRepository(db)
 	playerRepo := repository.NewPlayerRepository(db)
+	assetRepo := repository.NewAssetRepository(db)
 
 	sessionService := services.NewSessionService(sessionRepo, playerRepo)
-	gameService := services.NewGameService(sessionRepo, playerRepo)
+	gameService := services.NewGameService(sessionRepo, playerRepo, assetRepo)
 
 	sessionHandler := NewSessionHandler(sessionService)
 	gameHandler := NewGameHandler(gameService)
