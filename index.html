@@ -422,6 +422,20 @@
           }
         }
 
+        const loadGameState = async () => {
+          try {
+            const response = await fetch(`/game/${sessionCode.value}/state`);
+            const data = await response.json();
+            
+            currentPlayer.value = data.currentPlayer;
+            gamePlayers.value = data.players;
+            isCurrentPlayer.value = data.isCurrentPlayer;
+            gameLog.value = data.log || [];
+          } catch (err) {
+            errorMessage.value = 'Ошибка загрузки состояния игры';
+          }
+        };
+
         return { 
           sessionCode, players, startNewGame, joinGame, getPlayers, playerReady,
           isLoading, errorMessage, showJoinForm, joinCode, joinError,gameStarted,
