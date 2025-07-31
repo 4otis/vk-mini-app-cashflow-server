@@ -426,7 +426,10 @@
 
         const loadGameState = async () => {
           try {
-            const response = await fetch(`/game/${sessionCode.value}/state`);
+            const response = await fetch(`/game/${sessionCode.value}/state`, {
+              method: 'GET',
+            }
+            );
             const data = await response.json();
             
             currentPlayer.value = data.currentPlayer;

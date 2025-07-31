@@ -30,6 +30,7 @@ func SetupRoutes(g *gin.Engine, db *gorm.DB) {
 	g.POST("/sessions/:code/join", sessionHandler.JoinSession)
 	g.GET("/sessions/:code/players", sessionHandler.GetSessionPlayers)
 	g.PATCH("/game/:code/ready", gameHandler.TryStartGame)
+	g.GET("/game/:code/state", gameHandler.TryStartGame)
 
 	g.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"https://cshflw.ru/*", "https://vk.com"},
