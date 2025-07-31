@@ -77,10 +77,13 @@ func (s *GameService) InitPlayers(ctx context.Context, code string) (dto.GameSta
 		return response, err
 	}
 
+	log.Println("babah")
+
 	players, err := s.playerRepo.ReadAll(session.ID)
 	if err != nil {
 		return response, err
 	}
+	log.Println("babah2")
 
 	response.SessionCode = code
 	response.CurrentTurn = 0
@@ -91,6 +94,7 @@ func (s *GameService) InitPlayers(ctx context.Context, code string) (dto.GameSta
 		if err != nil {
 			return response, err
 		}
+		log.Println("babah3")
 
 		response.Players = append(response.Players, dto.PlayerStat{
 			VKID:          p.VKID,
