@@ -45,11 +45,12 @@ func (h *GameHandler) LoadGameState(c *gin.Context) {
 
 	// обращаю внимание на то, что карточки персонажей должны быть изначально заданы
 	// в MVP-версии будет существовать только одна карточка
-	resp := h.gameService
+	resp, err := h.gameService.InitPlayers(c.Request.Context(), c.Param("code"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	// TODO: определить очередность игроков
-
-	// TODO: послать статус, ответ
 	c.JSON(http.StatusOK, resp)
 
 }

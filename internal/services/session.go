@@ -141,7 +141,7 @@ func convertPlayerToDTO(player *models.Player) *dto.PlayerResponse {
 		CharacterID:   player.CharacterID,
 		PassiveIncome: player.PassiveIncome,
 		TotalIncome:   player.TotalIncome,
-		CashFlow:      player.CashFlow,
+		Cashflow:      player.Cashflow,
 		Balance:       player.Balance,
 		BankLoan:      player.BankLoan,
 	}

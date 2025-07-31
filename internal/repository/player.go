@@ -1,9 +1,16 @@
 package repository
 
 import (
+	"fmt"
+	"math/rand/v2"
+
 	"github.com/4otis/vk-mini-app-cashflow-server/internal/models"
 	"gorm.io/gorm"
 )
+
+func randRange(min, max int) int {
+	return rand.IntN(max-min) + min
+}
 
 type PlayerRepository struct {
 	db *gorm.DB
@@ -54,4 +61,40 @@ func (r PlayerRepository) UpdateFields(id uint, updates map[string]interface{}) 
 
 func (r PlayerRepository) Delete(id uint) error {
 	return r.db.Delete(&models.Player{}, id).Error
+}
+
+func (r PlayerRepository) InitPlayer(id uint) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		// 1. Verify player exists
+		var player models.Player
+		if err := tx.First(&player, id).Error; err != nil {
+			return fmt.Errorf("player not found: %w", err)
+		}
+
+		var character models.Character
+		if err := tx.Order("RANDOM()").First(&character).Error; err != nil {
+			return fmt.Errorf("failed to get random character: %w", err)
+		}
+
+		totalIncome := 0 + character.Salary
+		totalExpenses := character.Taxes + character.ChildExpenses*player.ChildAmount + character.OtherExpenses
+
+		// 5. Prepare player initialization params
+		params := map[string]interface{}{
+			"character_id":   character.ID,
+			"passive_income": 0,
+			"total_income":   totalIncome,
+			"total_expenses": totalExpenses,
+			"cashflow":       totalIncome - totalExpenses,
+			"balance":        0,
+			"bank_loan":      0,
+		}
+
+		// 6. Update player fields
+		if err := tx.Model(&models.Player{}).Where("id = ?", id).Updates(params).Error; err != nil {
+			return fmt.Errorf("failed to update player: %w", err)
+		}
+
+		return nil
+	})
 }

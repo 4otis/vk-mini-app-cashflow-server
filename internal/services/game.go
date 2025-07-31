@@ -69,6 +69,41 @@ func (s *GameService) TryStartGame(ctx context.Context, code string, VKID int) (
 	return result, nil
 }
 
-func InitPlayers() {
+func (s *GameService) InitPlayers(ctx context.Context, code string) (dto.GameStateResponse, error) {
+	var response dto.GameStateResponse
 
+	session, err := s.sessionRepo.Read(code)
+	if err != nil {
+		return response, err
+	}
+
+	players, err := s.playerRepo.ReadAll(session.ID)
+	if err != nil {
+		return response, err
+	}
+
+	response.SessionCode = code
+	response.CurrentTurn = 0
+	response.Players = []dto.PlayerStat{}
+
+	for _, p := range players {
+		err = s.playerRepo.InitPlayer(p.ID)
+		if err != nil {
+			return response, err
+		}
+
+		response.Players = append(response.Players, dto.PlayerStat{
+			VKID:          p.VKID,
+			Nickname:      p.Nickname,
+			PassiveIncome: p.PassiveIncome,
+			TotalIncome:   p.TotalIncome,
+			TotalExpenses: p.TotalExpenses,
+			Cashflow:      p.Cashflow,
+			Position:      p.Position,
+			Balance:       p.Balance,
+			ChildAmount:   p.ChildAmount,
+		})
+	}
+
+	return response, nil
 }

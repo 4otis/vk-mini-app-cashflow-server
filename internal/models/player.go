@@ -10,11 +10,12 @@ type Player struct {
 	Ready         bool     `gorm:"default:false" json:"ready"`
 	Position      int      `gorm:"default:0" json:"position"`
 	CharacterID   uint     `gorm:"index" json:"character_id"`
-	PassiveIncome float64  `gorm:"type:decimal(10,2);default:0" json:"passive_income"`
-	TotalIncome   float64  `gorm:"type:decimal(10,2);default:0" json:"total_income"`
-	TotalExpenses float64  `gorm:"type:decimal(10,2);default:0" json:"total_expenses"`
-	CashFlow      float64  `gorm:"type:decimal(10,2);default:0" json:"cashflow"`
-	Balance       float64  `gorm:"type:decimal(10,2);default:0" json:"balance"`
-	BankLoan      float64  `gorm:"type:decimal(10,2);default:0" json:"bank_loan"`
+	PassiveIncome int      `gorm:"type:integer;default:0" json:"passive_income"`
+	TotalIncome   int      `gorm:"type:integer;default:0" json:"total_income"`
+	TotalExpenses int      `gorm:"type:integer;default:0" json:"total_expenses"`
+	Cashflow      int      `gorm:"type:integer;default:0" json:"cashflow"`
+	Balance       int      `gorm:"type:integer;default:0" json:"balance"`
+	BankLoan      int      `gorm:"type:integer;default:0" json:"bank_loan"`
+	ChildAmount   int      `gorm:"type:integer;default:0" json:"child_amount"`
 	Asset         []*Asset `gorm:"many2many:players_assets;"`
 }
