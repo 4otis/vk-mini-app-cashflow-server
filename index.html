@@ -271,8 +271,8 @@
         <div class="players-grid">
           <div v-for="player in gamePlayers" :key="player.id" class="player-card">
             <h4>{{ player.nickname }}</h4>
-            <p>Баланс: {{ player.cash }} тыс. ₽</p>
-            <p>Пассивный доход: {{ player.passiveIncome }} тыс. ₽</p>
+            <p>Баланс: {{ player.balance }} тыс. ₽</p>
+            <p>Пассивный доход: {{ player.passive_income }} тыс. ₽</p>
             <p v-if="player.isBankrupt" style="color: red;">БАНКРОТ</p>
           </div>
         </div>
@@ -315,8 +315,8 @@
           isVK.value = true;
           VK.WebApp.init()
             .then(() => VK.WebApp.getUserInfo())
-            .then(user => {
-              vkId.value = user.id;
+            .then(u => {
+              vkId.value = u.id;
             })
             .catch(err => {
               console.error('VK init error:', err);
@@ -331,13 +331,13 @@
           
           try {
             user.value = await vkBridge.send('VKWebAppGetUserInfo');
-            console.log('VK ID:', user.id);
+            console.log('VK ID:', user.value.id);
 
             const response = await fetch('/sessions', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
-                vk_id: user.id, 
+                vk_id: user.value.id, 
                 nickname: "player1"
               })
             });
@@ -364,13 +364,13 @@
           
           try {
             user.value = await vkBridge.send('VKWebAppGetUserInfo');
-            console.log('VK ID:', user.id);
+            console.log('VK ID:', user.value.id);
 
             const response = await fetch(`/sessions/${joinCode.value}/join`, {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
-                vk_id: user.id, 
+                vk_id: user.value.id, 
                 nickname: 'Игрок_' + vkId.value.toString().slice(-4)
               })
             });
@@ -412,7 +412,7 @@
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
-                vk_id: user.id
+                vk_id: user.value.id
               })
             });
           
@@ -436,14 +436,14 @@
             const data = await response.json();
     
             if (ourPlayerIndex.value === null) {
-              ourPlayerIndex.value = data.players.findIndex(p => p.VKID === user.id)
+              ourPlayerIndex.value = data.players.findIndex(p => p.VKID === user.value.id)
             }
 
             currentPlayer.value = data.players[data.currentTurn];
             gamePlayers.value = data.players;
             
             // Проверяем, является ли текущий игрок (чей ход) нашим игроком
-            isCurrentPlayer.value = data.currentTurn === ourPlayerIndex; // ourPlayerIndex нужно определить
+            isCurrentPlayer.value = data.currentTurn === ourPlayerIndex.value; // ourPlayerIndex нужно определить
             
             gameLog.value = data.log || [];
           } catch (err) {
