@@ -30,6 +30,7 @@ type PlayerStat struct {
 	Assets        []AssetStat `json:"assets"`
 	Balance       int         `json:"balance"`
 	ChildAmount   int         `json:"child_amount"`
+	BankLoan      int         `json:"bank_loan"`
 	// Liabilities   []Liability `json:"liabilities"`
 	// IsBankrupt    bool        `json:"is_bankrupt"`
 }

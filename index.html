@@ -195,45 +195,46 @@
           <h3>Ваш статус</h3>
           <div :class="['player-card', isCurrentPlayer ? 'current-player' : '']">
             <h4>{{ currentPlayer.nickname }}</h4>
-            <p>Баланс: {{ currentPlayer.cash }} ₽</p>
-            <p>Пассивный доход: {{ currentPlayer.passiveIncome }} ₽</p>
+            <p>Баланс: {{ currentPlayer.balance }} тыс. ₽</p>
+            <p>Пассивный доход: {{ currentPlayer.passive_income }} тыс. ₽</p>
           </div>
           
           <div class="player-stats">
             <div class="stat-item">
               <strong>Доход</strong>
-              <p>{{ currentPlayer.income }} ₽</p>
+              <p>{{ currentPlayer.total_income }} тыс. ₽</p>
             </div>
             <div class="stat-item">
               <strong>Расходы</strong>
-              <p>{{ currentPlayer.expenses }} ₽</p>
+              <p>{{ currentPlayer.total_expenses }} тыс. ₽</p>
             </div>
             <div class="stat-item">
               <strong>Дети</strong>
-              <p>{{ currentPlayer.children }}</p>
+              <p>{{ currentPlayer.child_amount }}</p>
             </div>
             <div class="stat-item">
               <strong>Кредиты</strong>
-              <p>{{ currentPlayer.loans }} ₽</p>
+              <p>{{ currentPlayer.bank_loan }} тыс. ₽</p>
             </div>
           </div>
           
           <div class="assets-list">
             <h4>Активы</h4>
             <div v-for="asset in currentPlayer.assets" :key="asset.id" class="asset-item">
-              <span>{{ asset.name }}</span>
-              <span>+{{ asset.income }} ₽</span>
+              <span>{{ asset.title }}</span>
+              <span>+{{ asset.cashflow }} тыс. ₽</span>
+              <span>(Цена: {{ asset.cashflow }} тыс. ₽)</span>
             </div>
           </div>
           
-          <div class="assets-list">
+          <!-- <div class="assets-list">
             <h4>Пассивы</h4>
             <div v-for="liability in currentPlayer.liabilities" :key="liability.id" class="asset-item">
               <span>{{ liability.name }}</span>
-              <span>-{{ liability.expense }} ₽</span>
+              <span>-{{ liability.expense }} тыс. ₽</span>
             </div>
           </div>
-        </div>
+        </div> -->
         
         <!-- Правая колонка - игровые действия и информация -->
         <div>
@@ -270,8 +271,8 @@
         <div class="players-grid">
           <div v-for="player in gamePlayers" :key="player.id" class="player-card">
             <h4>{{ player.nickname }}</h4>
-            <p>Баланс: {{ player.cash }} ₽</p>
-            <p>Пассивный доход: {{ player.passiveIncome }} ₽</p>
+            <p>Баланс: {{ player.cash }} тыс. ₽</p>
+            <p>Пассивный доход: {{ player.passiveIncome }} тыс. ₽</p>
             <p v-if="player.isBankrupt" style="color: red;">БАНКРОТ</p>
           </div>
         </div>
@@ -298,13 +299,15 @@
       const joinCode = ref('');
       const joinError = ref('');
       const isVK = ref(false);
-      const currentPlayer = ref({});
-      const isCurrentPlayer = ref(true);
+      const currentPlayer = ref(null);
+      const isCurrentPlayer = ref(false);
       const gamePlayers = ref([]);
       const currentCard = ref(null);
       const diceRolled = ref(false);
       const diceValue = ref(0);
       const gameLog = ref([]);
+      const ourPlayerIndex = ref(null);
+      const user = ref();
 
       // Проверяем, находимся ли мы внутри VK Mini App
       onMounted(() => {
@@ -327,7 +330,7 @@
           errorMessage.value = '';
           
           try {
-            const user = await vkBridge.send('VKWebAppGetUserInfo');
+            user.value = await vkBridge.send('VKWebAppGetUserInfo');
             console.log('VK ID:', user.id);
 
             const response = await fetch('/sessions', {
@@ -360,7 +363,7 @@
           joinError.value = '';
           
           try {
-            const user = await vkBridge.send('VKWebAppGetUserInfo');
+            user.value = await vkBridge.send('VKWebAppGetUserInfo');
             console.log('VK ID:', user.id);
 
             const response = await fetch(`/sessions/${joinCode.value}/join`, {
@@ -404,7 +407,7 @@
           isLoading.value = true;
           
           try {
-            const user = await vkBridge.send('VKWebAppGetUserInfo');
+            user.value = await vkBridge.send('VKWebAppGetUserInfo');
             const response = await fetch(`/game/${sessionCode.value}/ready`, {
               method: 'PATCH',
               headers: { 'Content-Type': 'application/json' },
@@ -431,13 +434,21 @@
             }
             );
             const data = await response.json();
-            
-            currentPlayer.value = data.currentPlayer;
+    
+            if (ourPlayerIndex.value === null) {
+              ourPlayerIndex.value = data.players.findIndex(p => p.VKID === user.id)
+            }
+
+            currentPlayer.value = data.players[data.currentTurn];
             gamePlayers.value = data.players;
-            isCurrentPlayer.value = data.isCurrentPlayer;
+            
+            // Проверяем, является ли текущий игрок (чей ход) нашим игроком
+            isCurrentPlayer.value = data.currentTurn === ourPlayerIndex; // ourPlayerIndex нужно определить
+            
             gameLog.value = data.log || [];
           } catch (err) {
             errorMessage.value = 'Ошибка загрузки состояния игры';
+            console.error(err);
           }
         };
 
