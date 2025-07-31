@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/4otis/vk-mini-app-cashflow-server/internal/dto"
@@ -52,5 +53,33 @@ func (h *GameHandler) LoadGameState(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, resp)
+}
 
+func (h *GameHandler) RollDice(c *gin.Context) {
+	// resp, err := h.gameService.MovePlayer(c.Request.Context(), c.Param("code"))
+
+	var req dto.RollDiceReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		// log.Printf("ERROR. BadRequest: (VKID=%d;)\n", req.VKID)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	log.Printf("Player: %d, value: %d;\n", req.VKID, req.DiceValue)
+}
+
+func (h *GameHandler) EndTurn(c *gin.Context) {
+	// resp, err := h.gameService.MovePlayer(c.Request.Context(), c.Param("code"))
+
+	var req dto.EndTurnReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		// log.Printf("ERROR. BadRequest: (VKID=%d;)\n", req.VKID)
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+	// log.Printf("Player: %d, value: %d;\n", req.VKID, req.DiceValue)
+
+	err := h.gameService.EndTurn(c.Request.Context(), c.Param("code"), req.VKID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
 }

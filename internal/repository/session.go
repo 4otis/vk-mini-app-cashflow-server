@@ -26,6 +26,10 @@ func (r SessionRepository) Read(code string) (*models.Session, error) {
 	return &session, nil
 }
 
+func (r SessionRepository) UpdateFields(id uint, updates map[string]interface{}) error {
+	return r.db.Model(&models.Session{}).Where("id = ?", id).Updates(updates).Error
+}
+
 func (r SessionRepository) Delete(id uint) error {
 	return r.db.Delete(&models.Session{}, id).Error
 }

@@ -235,16 +235,21 @@
             </div>
           </div> -->
         </div>
-        
+
+
+
         <!-- Правая колонка - игровые действия и информация -->
         <div>
           <div v-if="isCurrentPlayer" class="game-actions">
-            <button @click="rollDice">Бросить кубик</button>
-            <button @click="endTurn">Закончить ход</button>
+            <button @click="rollDice" :disabled="diceRolled || isRolling">
+              {{ isRolling ? 'Кубик летит...' : diceRolled ? 'Уже брошен' : 'Бросить кубик' }}
+            </button>
+
+            <button @click="endTurn" :disabled="!canEndTurn">Закончить ход</button>
             <button @click="takeLoan">Взять кредит</button>
-            <button @click="sellAsset">Продать актив</button>
-            <button @click="showDeals">Показать сделки</button>
-            <button @click="showMarket">Рынок</button>
+            <!-- <button @click="sellAsset">Продать актив</button>
+            <button @click="showDeals">Показать сделки</button> -->
+            <button @click="loadGameState">Обновить</button>
           </div>
           
           <div v-if="diceRolled" class="dice-result">
@@ -303,11 +308,13 @@
       const isCurrentPlayer = ref(false);
       const gamePlayers = ref([]);
       const currentCard = ref(null);
-      const diceRolled = ref(false);
-      const diceValue = ref(0);
       const gameLog = ref([]);
       const ourPlayerIndex = ref(null);
       const user = ref();
+      const diceRolled = ref(false);
+      const diceValue = ref(0);
+      const canEndTurn = ref(false);
+      const isRolling = ref(false);
 
       // Проверяем, находимся ли мы внутри VK Mini App
       onMounted(() => {
@@ -454,11 +461,78 @@
           }
         };
 
+        const rollDice = async () => {
+          if (isRolling.value) return;
+          
+          isRolling.value = true;
+          diceRolled.value = false;
+          
+          // Анимация броска (3 случайных числа перед финальным)
+          for (let i = 0; i < 3; i++) {
+            diceValue.value = Math.floor(Math.random() * 6) + 1;
+            await new Promise(resolve => setTimeout(resolve, 200));
+          }
+          
+          // Финальное значение
+          diceValue.value = Math.floor(Math.random() * 6) + 1;
+          diceRolled.value = true;
+          canEndTurn.value = true;
+          isRolling.value = false;
+          
+          try {
+            // Отправляем результат на сервер
+            const response = await fetch(`/game/${sessionCode.value}/roll`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                vk_id: user.value.id,
+                dice_value: diceValue.value
+              })
+            });
+            
+            if (!response.ok) throw new Error('Ошибка сервера');
+            
+            // Обновляем состояние игры
+            loadGameState();
+          } catch (err) {
+            errorMessage.value = 'Ошибка при броске кубика: ' + err.message;
+          }
+        };
+
+        // Функция завершения хода
+        const endTurn = async () => {
+          if (!canEndTurn.value) {
+            errorMessage.value = 'Сначала нужно бросить кубик!';
+            return;
+          }
+          
+          try {
+            const response = await fetch(`/game/${sessionCode.value}/endturn`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ vk_id: user.value.id })
+            });
+            
+            if (!response.ok) throw new Error('Ошибка сервера');
+            
+            // Сбрасываем состояния
+            diceRolled.value = false;
+            canEndTurn.value = false;
+            diceValue.value = 0;
+            
+            // Обновляем состояние игры
+            loadGameState();
+          } catch (err) {
+            errorMessage.value = 'Ошибка при завершении хода: ' + err.message;
+          }
+        };
+
         return { 
           sessionCode, players, startNewGame, joinGame, getPlayers, playerReady,
           isLoading, errorMessage, showJoinForm, joinCode, joinError,gameStarted,
           currentPlayer, isCurrentPlayer, gamePlayers,
-          currentCard, diceRolled, diceValue
+          currentCard, diceRolled, diceValue, rollDice, endTurn, loadGameState,
+          canEndTurn, isRolling
         };
       }
     }).mount('#app');

@@ -44,7 +44,7 @@ func (s *GameService) TryStartGame(ctx context.Context, code string, VKID int) (
 	}
 	players, err := s.playerRepo.ReadAll(session.ID)
 	if err != nil {
-
+		return nil, err
 	}
 
 	if !player.Ready {
@@ -107,4 +107,27 @@ func (s *GameService) InitPlayers(ctx context.Context, code string) (dto.GameSta
 	}
 
 	return response, nil
+}
+
+func (s *GameService) EndTurn(ctx context.Context, code string, VKID int) error {
+	session, err := s.sessionRepo.Read(code)
+	if err != nil {
+		return fmt.Errorf("failed to get session: %w", err)
+	}
+
+	players, err := s.playerRepo.ReadAll(session.ID)
+	if err != nil {
+		return err
+	}
+
+	cnt := len(players)
+	newTurn := int(session.CurrentTurn+1) % cnt
+
+	err = s.sessionRepo.UpdateFields(session.ID, map[string]interface{}{
+		"current_turn": newTurn,
+	})
+	if err != nil {
+		return err
+	}
+	return nil
 }

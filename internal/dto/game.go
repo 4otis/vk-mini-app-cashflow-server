@@ -1,7 +1,7 @@
 package dto
 
 type PlayerIsReady struct {
-	VKID int `json:"vk_id" binding:"required"`
+	VKID int `json:"vk_id"`
 	// Ready bool `json:"ready" binding:"required"`
 }
 
@@ -16,4 +16,13 @@ type GameStateResponse struct {
 	// 	Market        []Card `json:"market"`
 	// } `json:"deck,omitempty"`
 	// Log []GameLogEntry `json:"log"`
+}
+
+type RollDiceReq struct {
+	VKID      int `json:"vk_id"`
+	DiceValue int `json:"dice_value"`
+}
+
+type EndTurnReq struct {
+	VKID int `json:"vk_id"`
 }
