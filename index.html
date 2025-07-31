@@ -436,15 +436,15 @@
             const data = await response.json();
     
             if (ourPlayerIndex.value === null) {
-              ourPlayerIndex.value = data.players.findIndex(p => p.VKID === user.value.id);
+              ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
               console.log('ourPlayerIndex:', ourPlayerIndex.value);
             }
             
-            currentPlayer.value = data.players[data.currentTurn];
+            currentPlayer.value = data.players[data.cur_turn];
             gamePlayers.value = data.players;
             
             // Проверяем, является ли текущий игрок (чей ход) нашим игроком
-            isCurrentPlayer.value = data.currentTurn === ourPlayerIndex.value; // ourPlayerIndex нужно определить
+            isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value; // ourPlayerIndex нужно определить
             console.log('turn:', isCurrentPlayer.value);
             
             gameLog.value = data.log || [];
