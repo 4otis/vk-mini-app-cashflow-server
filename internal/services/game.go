@@ -68,3 +68,7 @@ func (s *GameService) TryStartGame(ctx context.Context, code string, VKID int) (
 
 	return result, nil
 }
+
+func InitPlayers() {
+
+}

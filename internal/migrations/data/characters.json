@@ -1,0 +1,44 @@
+[
+  {
+    "job": "Охранник",
+    "salary": 96,
+    "taxes": 20,
+    "child_expenses": 10,
+    "other_expenses": 35
+  },
+  {
+    "job": "Видеомонтажер",
+    "salary": 55,
+    "taxes": 9,
+    "child_expenses": 8,
+    "other_expenses": 7
+  },
+  {
+    "job": "Системный администратор",
+    "salary": 40,
+    "taxes": 8,
+    "child_expenses": 0,
+    "other_expenses": 15
+  },
+  {
+    "job": "Шеф-повар",
+    "salary": 260,
+    "taxes": 50,
+    "child_expenses": 35,
+    "other_expenses": 110
+  },
+  {
+    "job": "Мойщик окон",
+    "salary": 130,
+    "taxes": 25,
+    "child_expenses": 15,
+    "other_expenses": 40
+  },
+  {
+    "job": "Личный водитель",
+    "salary": 200,
+    "taxes": 40,
+    "child_expenses": 18,
+    "other_expenses": 82
+  }
+]

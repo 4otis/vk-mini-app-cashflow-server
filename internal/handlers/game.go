@@ -39,3 +39,17 @@ func (h *GameHandler) TryStartGame(c *gin.Context) {
 
 	c.JSON(http.StatusCreated, resp)
 }
+
+func (h *GameHandler) LoadGameState(c *gin.Context) {
+	// TODO: рассчет начальных значений карточек игроков (playerService)
+
+	// обращаю внимание на то, что карточки персонажей должны быть изначально заданы
+	// в MVP-версии будет существовать только одна карточка
+	resp := h.gameService
+
+	// TODO: определить очередность игроков
+
+	// TODO: послать статус, ответ
+	c.JSON(http.StatusOK, resp)
+
+}

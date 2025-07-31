@@ -6,6 +6,7 @@ import (
 
 	"github.com/4otis/vk-mini-app-cashflow-server/internal/config"
 	"github.com/4otis/vk-mini-app-cashflow-server/internal/handlers"
+	"github.com/4otis/vk-mini-app-cashflow-server/internal/migrations"
 	"github.com/4otis/vk-mini-app-cashflow-server/internal/models"
 	"github.com/gin-gonic/gin"
 )
@@ -28,6 +29,11 @@ func main() {
 
 	if err := db.AutoMigrate(&models.Session{}, &models.Player{}); err != nil {
 		log.Fatal("Migration failed:", err)
+	}
+
+	err = migrations.RunInitDbMigrations(db)
+	if err != nil {
+		log.Printf("Error. Failed to migrated db. err: %e", err)
 	}
 
 	g := gin.Default()
