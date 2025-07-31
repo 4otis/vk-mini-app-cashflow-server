@@ -415,6 +415,8 @@
           
             players.value = await response.json();
             gameStarted.value = true;
+            loadGameState();
+            
           } catch {
             errorMessage.value = 'Ошибка при отправке статуса готовности';
           } finally {
