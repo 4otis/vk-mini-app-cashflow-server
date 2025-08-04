@@ -418,10 +418,6 @@
             user.value = await vkBridge.send('VKWebAppGetUserInfo');
             const response = await fetch(`/game/${sessionCode.value}/everyoneready`, {
               method: 'GET',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                vk_id: user.value.id
-              })
             });
           
             data = await response.json();
