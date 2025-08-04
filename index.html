@@ -477,7 +477,7 @@
             
             // Проверяем, является ли текущий игрок (чей ход) нашим игроком
             isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value; // ourPlayerIndex нужно определить
-            console.log('turn:', isCurrentPlayer.value);
+            console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
             
             gameLog.value = data.log || [];
           } catch (err) {
@@ -504,7 +504,7 @@
             
             // Проверяем, является ли текущий игрок (чей ход) нашим игроком
             isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value; // ourPlayerIndex нужно определить
-            console.log('turn:', isCurrentPlayer.value);
+            console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
             
             gameLog.value = data.log || [];
           } catch (err) {
