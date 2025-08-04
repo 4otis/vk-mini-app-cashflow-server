@@ -7,6 +7,6 @@ type Session struct {
 	Code        string   `gorm:"uniqueIndex;size:8"`
 	Players     []Player `gorm:"foreignKey:SessionID"`
 	IsActive    bool     `gorm:"default:false"`
-	CurrentTurn uint
+	CurrentTurn int
 	// CreatorID   uint
 }

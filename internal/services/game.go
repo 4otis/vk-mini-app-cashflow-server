@@ -152,7 +152,7 @@ func (s *GameService) LoadGameState(ctx context.Context, code string) (dto.GameS
 	}
 
 	response.SessionCode = code
-	response.CurrentTurn = 0
+	response.CurrentTurn = session.CurrentTurn
 	response.Players = []dto.PlayerStat{}
 
 	for _, p := range players {
