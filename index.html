@@ -316,6 +316,8 @@
       const diceValue = ref(0);
       const canEndTurn = ref(false);
       const isRolling = ref(false);
+      const pollStateInterval = ref(null);
+      const pollReadyInterval = ref(null);
 
       // Проверяем, находимся ли мы внутри VK Mini App
       onMounted(() => {
@@ -451,7 +453,8 @@
               })
             });
           
-            players.value = await response.json();           
+            players.value = await response.json();  
+            startPollingReady();         
           } catch {
             errorMessage.value = 'Ошибка при отправке статуса готовности';
           } finally {
@@ -461,25 +464,17 @@
 
         const initGameState = async () => {
           try {
+            stopPollingReady();
+
             const response = await fetch(`/game/${sessionCode.value}/initgame`, {
               method: 'GET',
             }
             );
             const data = await response.json();
     
-            if (ourPlayerIndex.value === null) {
-              ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
-              console.log('ourPlayerIndex:', ourPlayerIndex.value);
-            }
-            
-            currentPlayer.value = data.players[data.cur_turn];
-            gamePlayers.value = data.players;
-            
-            // Проверяем, является ли текущий игрок (чей ход) нашим игроком
-            isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value; // ourPlayerIndex нужно определить
-            console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
-            
-            gameLog.value = data.log || [];
+            processGameData(data)
+            startPollingState();
+
           } catch (err) {
             errorMessage.value = 'Ошибка загрузки состояния игры';
             console.error(err);
@@ -487,6 +482,8 @@
         };
 
         const loadGameState = async () => {
+          stopPollingReady();
+
           try {
             const response = await fetch(`/game/${sessionCode.value}/state`, {
               method: 'GET',
@@ -494,19 +491,8 @@
             );
             const data = await response.json();
     
-            if (ourPlayerIndex.value === null) {
-              ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
-              console.log('ourPlayerIndex:', ourPlayerIndex.value);
-            }
-            
-            currentPlayer.value = data.players[data.cur_turn];
-            gamePlayers.value = data.players;
-            
-            // Проверяем, является ли текущий игрок (чей ход) нашим игроком
-            isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value; // ourPlayerIndex нужно определить
-            console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
-            
-            gameLog.value = data.log || [];
+            startPollingState();
+
           } catch (err) {
             errorMessage.value = 'Ошибка загрузки состояния игры';
             console.error(err);
@@ -551,7 +537,6 @@
           }
         };
 
-        // Функция завершения хода
         const endTurn = async () => {
           if (!canEndTurn.value) {
             errorMessage.value = 'Сначала нужно бросить кубик!';
@@ -573,18 +558,50 @@
             diceValue.value = 0;
             
             // Обновляем состояние игры
-            loadGameState();
+            await loadGameState();
           } catch (err) {
             errorMessage.value = 'Ошибка при завершении хода: ' + err.message;
           }
         };
 
+        const startPollingState = () => {
+          pollStateInterval.value = setInterval(loadGameState, 3000);
+        };
+
+        const stopPollingState = () => {
+          clearInterval(pollStateInterval.value);
+        };
+
+        const startPollingReady = () => {
+          pollReadyInterval.value = setInterval(allPlayersReady, 1000);
+        };
+
+        const stopPollingReady = () => {
+          clearInterval(pollReadyInterval.value);
+        };
+
+        const processGameData = (data) => {
+          if (ourPlayerIndex.value === null) {
+            ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
+          }
+          
+          currentPlayer.value = data.players[data.cur_turn];
+          gamePlayers.value = data.players;
+          isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value;
+          console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
+            
+           
+          gameLog.value = data.log || [];
+        };
+        
+        
         return { 
           sessionCode, players, startNewGame, joinGame, getPlayers, playerReady,
           isLoading, errorMessage, showJoinForm, joinCode, joinError,gameStarted,
-          currentPlayer, isCurrentPlayer, gamePlayers,
-          currentCard, diceRolled, diceValue, rollDice, endTurn, loadGameState,
-          canEndTurn, isRolling, initGameState, allPlayersReady
+          currentPlayer, isCurrentPlayer, gamePlayers, currentCard, diceRolled,
+          diceValue, rollDice, endTurn, loadGameState, canEndTurn, isRolling,
+          initGameState, allPlayersReady, startPollingState, stopPollingState,
+          processGameData, startPollingReady, stopPollingReady
         };
       }
     }).mount('#app');
