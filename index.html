@@ -247,7 +247,7 @@
             </button>
 
             <button @click="endTurn" :disabled="!canEndTurn">Закончить ход</button>
-            <button @click="takeLoan">Взять кредит</button>
+            <!-- <button @click="takeLoan">Взять кредит</button> -->
             <!-- <button @click="sellAsset">Продать актив</button>
             <button @click="showDeals">Показать сделки</button> -->
             <button @click="loadGameState">Обновить</button>
@@ -592,7 +592,8 @@
             ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
           }
           
-          currentPlayer.value = data.players[data.cur_turn];
+          currentPlayer.value = data.players[ourPlayerIndex.value];
+          console.log(currentPlayer)
           gamePlayers.value = data.players;
           isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value;
           console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
