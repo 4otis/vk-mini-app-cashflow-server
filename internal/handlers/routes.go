@@ -29,8 +29,10 @@ func SetupRoutes(g *gin.Engine, db *gorm.DB) {
 	g.POST("/sessions", sessionHandler.CreateSession)
 	g.POST("/sessions/:code/join", sessionHandler.JoinSession)
 	g.GET("/sessions/:code/players", sessionHandler.GetSessionPlayers)
-	g.PATCH("/game/:code/ready", gameHandler.TryStartGame)
+	g.GET("/sessions/:code/everyoneready", gameHandler.PlayersAreReady)
+	g.PATCH("/game/:code/ready", gameHandler.PlayerIsReady)
 	g.GET("/game/:code/state", gameHandler.LoadGameState)
+	g.GET("/game/:code/initgame", gameHandler.InitGameState)
 	g.POST("/game/:code/roll", gameHandler.RollDice)
 	g.POST("/game/:code/endturn", gameHandler.EndTurn)
 

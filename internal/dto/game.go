@@ -5,6 +5,10 @@ type PlayerIsReady struct {
 	// Ready bool `json:"ready" binding:"required"`
 }
 
+type PlayersAreReadyRespone struct {
+	Ready bool `json:"ready"`
+}
+
 type GameStateResponse struct {
 	SessionCode string       `json:"code"`
 	Players     []PlayerStat `json:"players"`

@@ -408,6 +408,37 @@
           }
         };
 
+        const allPlayersReady = async () => {
+          if (!sessionCode.value) return;
+          
+          isLoading.value = true;
+          
+          try {
+            user.value = await vkBridge.send('VKWebAppGetUserInfo');
+            const response = await fetch(`/game/${sessionCode.value}/everyoneready`, {
+              method: 'GET',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ 
+                vk_id: user.value.id
+              })
+            });
+          
+            data = await response.json();
+            
+            if (data.ready) {
+              gameStarted.value = true;
+              initGameState();
+            } else {
+              console.log("Не все игроки приготовились к игре!")
+            }
+                        
+          } catch {
+            errorMessage.value = 'Ошибка при проверке статуса готовности игроков';
+          } finally {
+            isLoading.value = false;
+          }
+        }
+
         const playerReady = async () => {
           if (!sessionCode.value) return;
           
@@ -423,10 +454,7 @@
               })
             });
           
-            players.value = await response.json();
-            gameStarted.value = true;
-            loadGameState();
-            
+            players.value = await response.json();           
           } catch {
             errorMessage.value = 'Ошибка при отправке статуса готовности';
           } finally {

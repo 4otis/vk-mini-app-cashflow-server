@@ -25,7 +25,7 @@ func NewGameService(sessionRepo *repository.SessionRepository,
 	}
 }
 
-func (s *GameService) TryStartGame(ctx context.Context, code string, VKID int) ([]dto.PlayerResponse, error) {
+func (s *GameService) PlayerIsReady(ctx context.Context, code string, VKID int) ([]dto.PlayerResponse, error) {
 	session, err := s.sessionRepo.Read(code)
 	if err != nil {
 		return nil, fmt.Errorf("failed to get session: %w", err)
@@ -47,19 +47,19 @@ func (s *GameService) TryStartGame(ctx context.Context, code string, VKID int) (
 		return nil, err
 	}
 
-	if !player.Ready {
+	// if !player.Ready {
 
-		for _, pl := range players {
-			if !pl.Ready {
-				break
-			}
-		}
+	// 	for _, pl := range players {
+	// 		if !pl.Ready {
+	// 			break
+	// 		}
+	// 	}
 
-		log.Printf("ALL PLAYERS ARE READY!!!")
-		log.Printf("ALL PLAYERS ARE READY!!!")
-		log.Printf("ALL PLAYERS ARE READY!!!")
+	// 	log.Printf("ALL PLAYERS ARE READY!!!")
+	// 	log.Printf("ALL PLAYERS ARE READY!!!")
+	// 	log.Printf("ALL PLAYERS ARE READY!!!")
 
-	}
+	// }
 
 	result := make([]dto.PlayerResponse, 0, len(players))
 	for _, p := range players {
@@ -69,7 +69,36 @@ func (s *GameService) TryStartGame(ctx context.Context, code string, VKID int) (
 	return result, nil
 }
 
-func (s *GameService) InitPlayers(ctx context.Context, code string) (dto.GameStateResponse, error) {
+func (s *GameService) ArePlayersReady(ctx context.Context, code string) (dto.PlayersAreReadyRespone, error) {
+	var response dto.PlayersAreReadyRespone
+	response.Ready = false
+
+	session, err := s.sessionRepo.Read(code)
+	if err != nil {
+		return response, fmt.Errorf("failed to get session: %w", err)
+	}
+
+	players, err := s.playerRepo.ReadAll(session.ID)
+	if err != nil {
+		return response, fmt.Errorf("failed to read all players: %w", err)
+	}
+
+	for _, pl := range players {
+		if !pl.Ready {
+			return response, nil
+		}
+	}
+
+	log.Printf("ALL PLAYERS ARE READY!!!")
+	log.Printf("ALL PLAYERS ARE READY!!!")
+	log.Printf("ALL PLAYERS ARE READY!!!")
+
+	response.Ready = true
+
+	return response, nil
+}
+
+func (s *GameService) InitGameState(ctx context.Context, code string) (dto.GameStateResponse, error) {
 	var response dto.GameStateResponse
 
 	session, err := s.sessionRepo.Read(code)
@@ -92,6 +121,41 @@ func (s *GameService) InitPlayers(ctx context.Context, code string) (dto.GameSta
 			return response, err
 		}
 
+		response.Players = append(response.Players, dto.PlayerStat{
+			VKID:          p.VKID,
+			Nickname:      p.Nickname,
+			PassiveIncome: p.PassiveIncome,
+			TotalIncome:   p.TotalIncome,
+			TotalExpenses: p.TotalExpenses,
+			Cashflow:      p.Cashflow,
+			Position:      p.Position,
+			Balance:       p.Balance,
+			ChildAmount:   p.ChildAmount,
+			BankLoan:      p.BankLoan,
+		})
+	}
+
+	return response, nil
+}
+
+func (s *GameService) LoadGameState(ctx context.Context, code string) (dto.GameStateResponse, error) {
+	var response dto.GameStateResponse
+
+	session, err := s.sessionRepo.Read(code)
+	if err != nil {
+		return response, err
+	}
+
+	players, err := s.playerRepo.ReadAll(session.ID)
+	if err != nil {
+		return response, err
+	}
+
+	response.SessionCode = code
+	response.CurrentTurn = 0
+	response.Players = []dto.PlayerStat{}
+
+	for _, p := range players {
 		response.Players = append(response.Players, dto.PlayerStat{
 			VKID:          p.VKID,
 			Nickname:      p.Nickname,

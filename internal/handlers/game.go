@@ -19,7 +19,7 @@ func NewGameHandler(gameService *services.GameService) *GameHandler {
 	}
 }
 
-func (h *GameHandler) TryStartGame(c *gin.Context) {
+func (h *GameHandler) PlayerIsReady(c *gin.Context) {
 	var req dto.PlayerIsReady
 	if err := c.ShouldBindJSON(&req); err != nil {
 		// log.Printf("ERROR. BadRequest: (VKID=%d;)\n", req.VKID)
@@ -32,7 +32,7 @@ func (h *GameHandler) TryStartGame(c *gin.Context) {
 		return
 	}
 
-	resp, err := h.gameService.TryStartGame(c.Request.Context(), c.Param("code"), req.VKID)
+	resp, err := h.gameService.PlayerIsReady(c.Request.Context(), c.Param("code"), req.VKID)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
@@ -41,12 +41,28 @@ func (h *GameHandler) TryStartGame(c *gin.Context) {
 	c.JSON(http.StatusCreated, resp)
 }
 
-func (h *GameHandler) LoadGameState(c *gin.Context) {
-	// TODO: рассчет начальных значений карточек игроков (playerService)
+func (h *GameHandler) PlayersAreReady(c *gin.Context) {
+	resp, err := h.gameService.ArePlayersReady(c.Request.Context(), c.Param("code"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
 
-	// обращаю внимание на то, что карточки персонажей должны быть изначально заданы
-	// в MVP-версии будет существовать только одна карточка
-	resp, err := h.gameService.InitPlayers(c.Request.Context(), c.Param("code"))
+	c.JSON(http.StatusOK, resp)
+}
+
+func (h *GameHandler) InitGameState(c *gin.Context) {
+	resp, err := h.gameService.InitGameState(c.Request.Context(), c.Param("code"))
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
+}
+
+func (h *GameHandler) LoadGameState(c *gin.Context) {
+	resp, err := h.gameService.LoadGameState(c.Request.Context(), c.Param("code"))
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
