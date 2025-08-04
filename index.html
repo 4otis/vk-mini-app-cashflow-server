@@ -577,7 +577,7 @@
         const startPollingReady = async () => {
           stopPollingReady();
           console.log("startPollingReady!")
-          pollReadyInterval.value = setInterval(allPlayersReady, 1000);
+          pollReadyInterval.value = setInterval(allPlayersReady, 2000);
         };
 
         const stopPollingReady = async () => {
@@ -589,7 +589,7 @@
             ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
           }
           
-          currentPlayer.value = data.players[data.cur_turn];
+          currentPlayer.value = data.players[ourPlayerIndex];
           gamePlayers.value = data.players;
           isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value;
           console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
