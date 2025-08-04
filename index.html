@@ -463,7 +463,7 @@
           }
         }
 
-        const InitGameState = async () => {
+        const initGameState = async () => {
           try {
             const response = await fetch(`/game/${sessionCode.value}/initgame`, {
               method: 'GET',
@@ -588,7 +588,7 @@
           isLoading, errorMessage, showJoinForm, joinCode, joinError,gameStarted,
           currentPlayer, isCurrentPlayer, gamePlayers,
           currentCard, diceRolled, diceValue, rollDice, endTurn, loadGameState,
-          canEndTurn, isRolling
+          canEndTurn, isRolling, initGameState, allPlayersReady
         };
       }
     }).mount('#app');
