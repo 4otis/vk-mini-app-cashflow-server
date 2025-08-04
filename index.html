@@ -491,6 +491,7 @@
             );
             const data = await response.json();
     
+            processGameData(data)
             startPollingState();
 
           } catch (err) {
@@ -573,6 +574,7 @@
         };
 
         const startPollingReady = () => {
+          log.Error("startPollingReady!")
           pollReadyInterval.value = setInterval(allPlayersReady, 1000);
         };
 
