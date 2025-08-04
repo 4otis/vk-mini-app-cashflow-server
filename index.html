@@ -592,7 +592,7 @@
             ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
           }
           
-          currentPlayer.value = data.players[ourPlayerIndex];
+          currentPlayer.value = data.players[ourPlayerIndex.value];
           gamePlayers.value = data.players;
           isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value;
           console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
