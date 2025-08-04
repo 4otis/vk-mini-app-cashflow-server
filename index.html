@@ -284,13 +284,51 @@
         </div>
       </div>
 
+      <!-- Модальное окно для карточки -->
+      <div v-if="showCardModal" class="modal-overlay">
+        <div class="modal-content" :class="cardModalClass">
+          <button class="modal-close" @click="closeCardModal">&times;</button>
+          <h3 class="card-title">{{ currentCard.title }}</h3>
+          <img v-if="currentCard.image" :src="currentCard.image" class="card-image" alt="Card image">
+          <p class="card-description">{{ currentCard.description }}</p>
+          
+          <div v-if="currentCard.type === 'REAL_ESTATE'">
+            <p class="card-cost">Стоимость: {{ currentCard.price }} тыс. ₽</p>
+            <p>Пассивный доход: +{{ currentCard.cashflow }} тыс. ₽</p>
+          </div>
+          
+          <div v-if="currentCard.type === 'MARKET'">
+            <p>Рыночная цена: {{ currentCard.market_price }} тыс. ₽</p>
+            <p>Можно продать другим игрокам</p>
+          </div>
+          
+          <div v-if="currentCard.type === 'EXPENSE'">
+            <p class="card-cost">Стоимость: {{ currentCard.amount }} тыс. ₽</p>
+          </div>
+          
+          <div v-if="currentCard.type === 'CHILD'">
+            <p>Теперь у вас {{ currentPlayer.child_amount + 1 }} детей</p>
+            <p>Ежемесячные расходы увеличатся на {{ currentCard.expense_increase }} тыс. ₽</p>
+          </div>
+          
+          <div class="card-actions">
+            <button v-for="action in currentCard.actions" 
+                    :key="action" 
+                    @click="handleCardAction(action)">
+              {{ action }}
+            </button>
+            <button v-if="canSkipCard" @click="skipCard" class="secondary">Пропустить</button>
+          </div>
+        </div>
+      </div>
+    </div>
 
 
     </div>
   </div>
   </div>
   <script>
-  const { createApp, ref, onMounted } = Vue;
+  const { createApp, ref, onMounted, computed } = Vue;
   
   
   createApp({
@@ -318,6 +356,18 @@
       const isRolling = ref(false);
       const pollStateInterval = ref(null);
       const pollReadyInterval = ref(null);
+      const showCardModal = ref(false);
+      const canSkipCard = ref(false);      
+      const cardModalClass = computed(() => {
+        if (!currentCard.value) return '';
+        switch(currentCard.value.type) {
+          case 'REAL_ESTATE': return 'opportunity-card';
+          case 'MARKET': return 'market-card';
+          case 'EXPENSE': return 'expense-card';
+          case 'CHILD': return 'child-card';
+          default: return '';
+        }
+      });
 
       // Проверяем, находимся ли мы внутри VK Mini App
       onMounted(() => {
@@ -348,7 +398,7 @@
               headers: { 'Content-Type': 'application/json' },
               body: JSON.stringify({ 
                 vk_id: user.value.id, 
-                nickname: "player1"
+                nickname: 'Игрок_' + vkId.value.toString().slice(-4)
               })
             });
             
@@ -600,8 +650,83 @@
             
            
           gameLog.value = data.log || [];
+
+          if (data.current_card && isCurrentPlayer.value) {
+            currentCard.value = data.current_card;
+            showCardModal.value = true;
+            
+            // Определяем, можно ли пропустить карточку
+            canSkipCard.value = data.current_card.type !== 'EXPENSE' && 
+                              data.current_card.type !== 'CHILD';
+          } else {
+            currentCard.value = null;
+            showCardModal.value = false;
+          }
         };
         
+
+        const handleCardAction = async (action) => {
+          try {
+            let endpoint = '';
+            let body = { vk_id: user.value.id };
+            
+            switch(action) {
+              case 'Купить':
+                endpoint = '/buy';
+                break;
+              case 'Продать':
+                endpoint = '/sell';
+                break;
+              case 'Отказаться':
+                endpoint = '/skip';
+                break;
+              case 'Оплатить':
+                endpoint = '/pay';
+                break;
+              case 'Родить ребенка':
+                endpoint = '/addchild';
+                break;
+            }
+            
+            const response = await fetch(`/game/${sessionCode.value}${endpoint}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body)
+            });
+            
+            if (!response.ok) throw new Error('Ошибка сервера');
+            
+            // Обновляем состояние игры
+            await loadGameState();
+            showCardModal.value = false;
+          } catch (err) {
+            errorMessage.value = 'Ошибка при обработке действия: ' + err.message;
+          }
+        };
+        
+        const skipCard = async () => {
+          try {
+            const response = await fetch(`/game/${sessionCode.value}/skip`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ vk_id: user.value.id })
+            });
+            
+            if (!response.ok) throw new Error('Ошибка сервера');
+            
+            await loadGameState();
+            showCardModal.value = false;
+          } catch (err) {
+            errorMessage.value = 'Ошибка при пропуске карточки: ' + err.message;
+          }
+        };
+        
+        const closeCardModal = () => {
+          if (canSkipCard.value) {
+            skipCard();
+          }
+          showCardModal.value = false;
+        };
         
         return { 
           sessionCode, players, startNewGame, joinGame, getPlayers, playerReady,
@@ -610,7 +735,8 @@
           diceValue, rollDice, endTurn, loadGameState, canEndTurn, isRolling,
           initGameState, allPlayersReady, startPollingState, stopPollingState,
           processGameData, startPollingReady, stopPollingReady, pollReadyInterval,
-          pollStateInterval
+          pollStateInterval, showCardModal, cardModalClass, canSkipCard,
+          handleCardAction, skipCard, closeCardModal
         };
       }
     }).mount('#app');
