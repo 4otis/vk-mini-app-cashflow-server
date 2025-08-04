@@ -417,7 +417,7 @@
           isLoading.value = true;
           
           try {
-            await getPlayers();
+            getPlayers();
 
 
             user.value = await vkBridge.send('VKWebAppGetUserInfo');
