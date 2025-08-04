@@ -566,6 +566,7 @@
         };
 
         const startPollingState = async () => {
+          stopPollingState();
           pollStateInterval.value = setInterval(loadGameState, 3000);
         };
 
@@ -574,6 +575,7 @@
         };
 
         const startPollingReady = async () => {
+          stopPollingReady();
           console.log("startPollingReady!")
           pollReadyInterval.value = setInterval(allPlayersReady, 1000);
         };
