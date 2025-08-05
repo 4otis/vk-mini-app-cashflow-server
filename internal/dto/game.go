@@ -13,6 +13,7 @@ type GameStateResponse struct {
 	SessionCode string       `json:"code"`
 	Players     []PlayerStat `json:"players"`
 	CurrentTurn int          `json:"cur_turn"`
+	// CurrentCard Card         `json:cur_card`
 	// Phase       GamePhase    `json:"phase"` // "waiting", "rolling", "trading", "end_turn"
 	// Board       []Cell       `json:"board,omitempty"`
 	// Deck        struct {
@@ -27,6 +28,18 @@ type RollDiceReq struct {
 	DiceValue int `json:"dice_value"`
 }
 
+type RollDiceResponse struct {
+	Player      PlayerStat `json:"player"`
+	CurrentCard Card       `json:"cur_card"`
+}
+
 type EndTurnReq struct {
 	VKID int `json:"vk_id"`
+}
+
+type Card struct {
+	Type   string     `json:"type"`
+	Asset  AssetCard  `json:"asset_card"`
+	Market MarketCard `json:"market_card"`
+	Issue  IssueCard  `json:"issue_card"`
 }

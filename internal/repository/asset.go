@@ -18,6 +18,11 @@ func (r *AssetRepository) Read(id uint) (asset *models.Asset, err error) {
 	return asset, err
 }
 
+func (r *AssetRepository) ReadRandom() (asset *models.Asset, err error) {
+	err = r.db.Order("RANDOM()").First(&asset).Error
+	return asset, err
+}
+
 // func (r *AssetRepository) ReadAll(playerID uint) (assets []*models.Asset, err error) {
 
 // }

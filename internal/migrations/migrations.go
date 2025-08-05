@@ -21,6 +21,16 @@ func RunInitDbMigrations(db *gorm.DB) error {
 		return err
 	}
 
+	err = RunIssueMigrations(db)
+	if err != nil {
+		return err
+	}
+
+	err = RunMarketMigrations(db)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -95,6 +105,84 @@ func RunCharaterMigrations(db *gorm.DB) error {
 				time.Now(), time.Now(),
 				c.Job, c.Salary, c.Taxes,
 				c.ChildExpenses, c.OtherExpenses,
+			).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
+
+func RunIssueMigrations(db *gorm.DB) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		sqlPath := filepath.Join("internal", "migrations", "sql", "init_issues.sql")
+		sqlBytes, err := os.ReadFile(sqlPath)
+		if err != nil {
+			return err
+		}
+
+		if err := tx.Exec(string(sqlBytes)).Error; err != nil {
+			return err
+		}
+
+		jsonPath := filepath.Join("internal", "migrations", "data", "issues.json")
+		jsonBytes, err := os.ReadFile(jsonPath)
+		if err != nil {
+			return err
+		}
+
+		var issues []models.Issue
+		if err := json.Unmarshal(jsonBytes, &issues); err != nil {
+			return err
+		}
+
+		for _, i := range issues {
+			if err := tx.Exec(`
+			INSERT INTO issues 
+			(created_at, updated_at, title, desc, price)
+			VALUES (?, ?, ?, ?, ?)`,
+				time.Now(), time.Now(),
+				i.Title, i.Descr, i.Price,
+			).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
+}
+
+func RunMarketMigrations(db *gorm.DB) error {
+	return db.Transaction(func(tx *gorm.DB) error {
+		sqlPath := filepath.Join("internal", "migrations", "sql", "init_market.sql")
+		sqlBytes, err := os.ReadFile(sqlPath)
+		if err != nil {
+			return err
+		}
+
+		if err := tx.Exec(string(sqlBytes)).Error; err != nil {
+			return err
+		}
+
+		jsonPath := filepath.Join("internal", "migrations", "data", "market.json")
+		jsonBytes, err := os.ReadFile(jsonPath)
+		if err != nil {
+			return err
+		}
+
+		var market []models.Market
+		if err := json.Unmarshal(jsonBytes, &market); err != nil {
+			return err
+		}
+
+		for _, offer := range market {
+			if err := tx.Exec(`
+			INSERT INTO market 
+			(created_at, updated_at, title, desc, type_id, sell_cost)
+			VALUES (?, ?, ?, ?, ?, ?)`,
+				time.Now(), time.Now(),
+				offer.Title, offer.Descr, offer.TypeID, offer.SellCost,
 			).Error; err != nil {
 				return err
 			}

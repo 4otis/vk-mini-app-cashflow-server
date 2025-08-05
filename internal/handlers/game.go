@@ -81,6 +81,14 @@ func (h *GameHandler) RollDice(c *gin.Context) {
 		return
 	}
 	log.Printf("Player: %d, value: %d;\n", req.VKID, req.DiceValue)
+
+	resp, err := h.gameService.RollDice(c.Request.Context(), c.Param("code"), req.VKID, req.DiceValue)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, resp)
 }
 
 func (h *GameHandler) EndTurn(c *gin.Context) {

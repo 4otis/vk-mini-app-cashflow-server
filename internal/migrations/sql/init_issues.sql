@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS issues CASCADE;
+
+CREATE TABLE issues (
+    id SERIAL PRIMARY KEY,
+    created_at TIMESTAMP WITH TIME ZONE,
+    updated_at TIMESTAMP WITH TIME ZONE,
+    deleted_at TIMESTAMP WITH TIME ZONE,
+    title VARCHAR(50) NOT NULL,
+    descr VARCHAR(100) NOT NULL,
+    price INTEGER DEFAULT 0
+);

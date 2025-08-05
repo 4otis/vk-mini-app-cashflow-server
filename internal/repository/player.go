@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-func randRange(min, max int) int {
+func RandRange(min, max int) int {
 	return rand.IntN(max-min) + min
 }
 
@@ -97,4 +97,41 @@ func (r PlayerRepository) InitPlayer(id uint) error {
 
 		return nil
 	})
+}
+
+func isPayday(pos int, value int) bool {
+	return value >= (8 - pos%8)
+}
+
+func (r PlayerRepository) MovePlayer(VKID int, value int) (*models.Player, error) {
+	var resultPlayer *models.Player
+
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		player := &models.Player{}
+		if err := tx.Where("vk_id = ?", VKID).First(player).Error; err != nil {
+			return fmt.Errorf("failed to find player: %w", err)
+		}
+
+		if isPayday(player.Position, value) {
+			if err := paydayPlayer(tx, player); err != nil {
+				return fmt.Errorf("payday failed: %w", err)
+			}
+		}
+
+		newPosition := (player.Position + value) % 24
+		if err := tx.Model(player).Update("position", newPosition).Error; err != nil {
+			return fmt.Errorf("failed to update position: %w", err)
+		}
+
+		resultPlayer = player
+		return nil
+	})
+
+	return resultPlayer, err
+}
+
+func paydayPlayer(tx *gorm.DB, player *models.Player) error {
+	newBalance := player.Balance + player.Cashflow
+
+	return tx.Model(player).Update("balance", newBalance).Error
 }

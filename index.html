@@ -288,28 +288,27 @@
       <div v-if="showCardModal" class="modal-overlay">
         <div class="modal-content" :class="cardModalClass">
           <button class="modal-close" @click="closeCardModal">&times;</button>
-          <h3 class="card-title">{{ currentCard.title }}</h3>
-          <img v-if="currentCard.image" :src="currentCard.image" class="card-image" alt="Card image">
-          <p class="card-description">{{ currentCard.description }}</p>
+          <h3 class="card-title">{{ currentCard.value.title }}</h3>
+          <!-- <img v-if="currentCard.image" :src="currentCard.image" class="card-image" alt="Card image"> -->
+          <p class="card-description">{{ currentCard.value.descr }}</p>
           
-          <div v-if="currentCard.type === 'REAL_ESTATE'">
-            <p class="card-cost">Стоимость: {{ currentCard.price }} тыс. ₽</p>
-            <p>Пассивный доход: +{{ currentCard.cashflow }} тыс. ₽</p>
+          <div v-if="currentCard.type === 'ASSET'">
+            <p class="card-cost">Стоимость: {{ currentCard.value.price }} тыс. ₽</p>
+            <p>Пассивный доход: +{{ currentCard.value.cashflow }} тыс. ₽</p>
           </div>
           
           <div v-if="currentCard.type === 'MARKET'">
-            <p>Рыночная цена: {{ currentCard.market_price }} тыс. ₽</p>
-            <p>Можно продать другим игрокам</p>
+            <p>Рыночная цена: {{ currentCard.value.sell_cost }} тыс. ₽</p>
           </div>
           
-          <div v-if="currentCard.type === 'EXPENSE'">
-            <p class="card-cost">Стоимость: {{ currentCard.amount }} тыс. ₽</p>
+          <div v-if="currentCard.type === 'ISSUE'">
+            <p class="card-cost">Стоимость: {{ currentCard.value.price }} тыс. ₽</p>
           </div>
           
-          <div v-if="currentCard.type === 'CHILD'">
+          <!-- <div v-if="currentCard.type === 'CHILD'">
             <p>Теперь у вас {{ currentPlayer.child_amount + 1 }} детей</p>
             <p>Ежемесячные расходы увеличатся на {{ currentCard.expense_increase }} тыс. ₽</p>
-          </div>
+          </div> -->
           
           <div class="card-actions">
             <button v-for="action in currentCard.actions" 
@@ -361,9 +360,9 @@
       const cardModalClass = computed(() => {
         if (!currentCard.value) return '';
         switch(currentCard.value.type) {
-          case 'REAL_ESTATE': return 'opportunity-card';
+          case 'ASSET': return 'opportunity-card';
           case 'MARKET': return 'market-card';
-          case 'EXPENSE': return 'expense-card';
+          case 'ISSUE': return 'expense-card';
           case 'CHILD': return 'child-card';
           default: return '';
         }
@@ -558,6 +557,8 @@
           
           isRolling.value = true;
           diceRolled.value = false;
+
+          stopPollingState();
           
           // Анимация броска (3 случайных числа перед финальным)
           for (let i = 0; i < 3; i++) {
@@ -610,7 +611,7 @@
             diceRolled.value = false;
             canEndTurn.value = false;
             diceValue.value = 0;
-            
+            isCurrentPlayer.value = false
             // Обновляем состояние игры
             await loadGameState();
           } catch (err) {
@@ -638,30 +639,42 @@
         };
 
         const processGameData = async (data) => {
-          if (ourPlayerIndex.value === null) {
-            ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
+          if (data.players !== null) {
+
+            if (ourPlayerIndex.value === null) {
+              ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
+            }
+          
+            currentPlayer.value = data.players[ourPlayerIndex.value];
+            console.log(currentPlayer)
+            gamePlayers.value = data.players;
+            isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value;
+            console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
           }
           
-          currentPlayer.value = data.players[ourPlayerIndex.value];
-          console.log(currentPlayer)
-          gamePlayers.value = data.players;
-          isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value;
-          console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
+          if (data.cur_card && isCurrentPlayer.value) {
+            switch (data.cur_card.type) {
+              case 'ASSET':
+                currentCard = data.asset_card
+              case 'ISSUE':
+                currentCard = data.issue_card
+              case 'MARKET':
+                currentCard = data.market_card
+            }
             
-           
-          gameLog.value = data.log || [];
-
-          if (data.current_card && isCurrentPlayer.value) {
-            currentCard.value = data.current_card;
+            currentCard.value = data.cur_card;
             showCardModal.value = true;
+            currentPlayer.value = data.player
             
             // Определяем, можно ли пропустить карточку
-            canSkipCard.value = data.current_card.type !== 'EXPENSE' && 
-                              data.current_card.type !== 'CHILD';
+            canSkipCard.value = data.cur_card.type !== 'ISSUE' && 
+            data.current_card.type !== 'CHILD';
           } else {
             currentCard.value = null;
             showCardModal.value = false;
           }
+
+          gameLog.value = data.log || [];
         };
         
 

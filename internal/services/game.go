@@ -13,15 +13,21 @@ type GameService struct {
 	sessionRepo repository.SessionRepository
 	playerRepo  repository.PlayerRepository
 	assetRepo   repository.AssetRepository
+	marketRepo  repository.MarketRepository
+	issueRepo   repository.IssueRepository
 }
 
 func NewGameService(sessionRepo *repository.SessionRepository,
 	playerRepo *repository.PlayerRepository,
-	assetRepo *repository.AssetRepository) *GameService {
+	assetRepo *repository.AssetRepository,
+	marketRepo *repository.MarketRepository,
+	issueRepo *repository.IssueRepository) *GameService {
 	return &GameService{
 		sessionRepo: *sessionRepo,
 		playerRepo:  *playerRepo,
 		assetRepo:   *assetRepo,
+		marketRepo:  *marketRepo,
+		issueRepo:   *issueRepo,
 	}
 }
 
@@ -171,6 +177,91 @@ func (s *GameService) LoadGameState(ctx context.Context, code string) (dto.GameS
 	}
 
 	return response, nil
+}
+
+func chooseCardType() string {
+	switch repository.RandRange(0, 2) {
+	case 0:
+		return "ASSET"
+	case 1:
+		return "MARKET"
+	case 2:
+		return "ISSUE"
+	case 3:
+		return "CHILD"
+	}
+
+	return ""
+}
+
+func (s *GameService) RollDice(ctx context.Context, code string, VKID int, value int) (dto.RollDiceResponse, error) {
+	var resp dto.RollDiceResponse
+
+	player, err := s.playerRepo.MovePlayer(VKID, value)
+	if err != nil {
+		return resp, err
+	}
+
+	resp.Player = dto.PlayerStat{
+		VKID:          player.VKID,
+		Nickname:      player.Nickname,
+		PassiveIncome: player.PassiveIncome,
+		TotalIncome:   player.TotalIncome,
+		TotalExpenses: player.TotalExpenses,
+		Cashflow:      player.Cashflow,
+		Position:      player.Position,
+	}
+
+	CardType := chooseCardType()
+	switch CardType {
+	case "ASSET":
+		card, err := s.assetRepo.ReadRandom()
+		if err != nil {
+			return resp, err
+		}
+
+		resp.CurrentCard = dto.Card{
+			Type: CardType,
+			Asset: dto.AssetCard{
+				Title:    card.Title,
+				Descr:    card.Descr,
+				Price:    card.Price,
+				Cashflow: card.Cashflow,
+			},
+		}
+	case "MARKET":
+		card, err := s.marketRepo.ReadRandom()
+		if err != nil {
+			return resp, err
+		}
+
+		resp.CurrentCard = dto.Card{
+			Type: CardType,
+			Market: dto.MarketCard{
+				Title:    card.Title,
+				Descr:    card.Descr,
+				SellCost: card.SellCost,
+			},
+		}
+	case "ISSUE":
+		card, err := s.issueRepo.ReadRandom()
+		if err != nil {
+			return resp, err
+		}
+
+		resp.CurrentCard = dto.Card{
+			Type: CardType,
+			Issue: dto.IssueCard{
+				Title: card.Title,
+				Descr: card.Descr,
+				Price: card.Price,
+			},
+		}
+	default:
+		return resp, fmt.Errorf("failed to indentify card")
+	}
+
+	return resp, nil
 }
 
 func (s *GameService) EndTurn(ctx context.Context, code string, VKID int) error {

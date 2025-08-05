@@ -15,9 +15,12 @@ func SetupRoutes(g *gin.Engine, db *gorm.DB) {
 	sessionRepo := repository.NewSessionRepository(db)
 	playerRepo := repository.NewPlayerRepository(db)
 	assetRepo := repository.NewAssetRepository(db)
+	marketRepo := repository.NewMarketRepository(db)
+	issueRepo := repository.NewIssueRepository(db)
 
 	sessionService := services.NewSessionService(sessionRepo, playerRepo)
-	gameService := services.NewGameService(sessionRepo, playerRepo, assetRepo)
+	gameService := services.NewGameService(sessionRepo, playerRepo,
+		assetRepo, marketRepo, issueRepo)
 
 	sessionHandler := NewSessionHandler(sessionService)
 	gameHandler := NewGameHandler(gameService)
