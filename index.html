@@ -653,42 +653,52 @@
             console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
           }
           
-          if (data.cur_card && typeof data.cur_card === 'object' && 
-              Object.keys(data.cur_card).length > 0 &&
-              data.cur_card.type && isCurrentPlayer.value) {
-            console.log("cur_card not null")
-
+          if (data.cur_card && data.cur_card.type && isCurrentPlayer.value) {
             currentCard.value = {
               type: data.cur_card.type,
               value: null,
               actions: []
-            }
+            };
 
             switch (data.cur_card.type) {
               case 'ASSET':
-                currentCard.value.value = data.cur_card.asset;
-                currentCard.value.actions = ['Купить', 'Отказаться'];
+                if (data.cur_card.asset) {
+                  currentCard.value.value = {
+                    title: data.cur_card.asset.title,
+                    descr: data.cur_card.asset.descr,
+                    price: data.cur_card.asset.price,
+                    cashflow: data.cur_card.asset.cashflow
+                  };
+                  currentCard.value.actions = ['Купить', 'Отказаться'];
+                }
                 break;
+                
               case 'MARKET':
-                currentCard.value.value = data.cur_card.market;
-                currentCard.value.actions = ['Продать', 'Отказаться'];
+                if (data.cur_card.market) {
+                  currentCard.value.value = {
+                    title: data.cur_card.market.title,
+                    descr: data.cur_card.market.descr,
+                    sell_cost: data.cur_card.market.sell_cost
+                  };
+                  currentCard.value.actions = ['Продать', 'Отказаться'];
+                }
                 break;
+                
               case 'ISSUE':
-                currentCard.value.value = data.cur_card.issue;
-                currentCard.value.actions = ['Оплатить'];
+                if (data.cur_card.issue) {
+                  currentCard.value.value = {
+                    title: data.cur_card.issue.title,
+                    descr: data.cur_card.issue.descr,
+                    price: data.cur_card.issue.price
+                  };
+                  currentCard.value.actions = ['Оплатить'];
+                }
                 break;
             }
-                  
-            console.log("CurrentCard: ", currentCard.value)
-            showCardModal.value = true;
-            currentPlayer.value = data.player
-            
-            // Определяем, можно ли пропустить карточку
-            canSkipCard.value = data.cur_card.type !== 'ISSUE' && 
-            data.cur_card.type !== 'CHILD';
+
+            showCardModal.value = currentCard.value.value !== null;
+            canSkipCard.value = data.cur_card.type !== 'ISSUE';
           } else {
-            console.log("cur_card is null or isCurrentPlayer: ", isCurrentPlayer.value)
-            console.log("cur_card: ", data.cur_card)
             currentCard.value = null;
             showCardModal.value = false;
           }
