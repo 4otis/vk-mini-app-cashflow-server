@@ -543,7 +543,6 @@
             );
             const data = await response.json();
     
-            console.log("Game state data:", data);
             processGameData(data)
             startPollingState();
 
@@ -641,6 +640,7 @@
         };
 
         const processGameData = async (data) => {
+          console.log("Game state data:", data);
           if (data.players !== null) {
 
             if (ourPlayerIndex.value === null) {
