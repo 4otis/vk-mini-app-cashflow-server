@@ -585,9 +585,8 @@
             
             if (!response.ok) throw new Error('Ошибка сервера');
             
-            console.log("rollDiceResponse: ", response, "cur_card: ". response.cur_card)
-            // Обновляем состояние игры
-            processGameData(response);
+            const data = await response.json();
+            processGameData(data)
           } catch (err) {
             errorMessage.value = 'Ошибка при броске кубика: ' + err.message;
           }
