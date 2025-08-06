@@ -259,7 +259,7 @@
           
           <div v-if="currentCard" class="player-info">
             <h3>Карта: {{ currentCard.type }}</h3>
-            <p>{{ currentCard.value.card.descr }}</p>
+            <!-- <p>{{ currentCard.value.card.descr }}</p> -->
             <p>{{ currentCard.card.descr }}</p>
             <div v-if="currentCard.actions && isCurrentPlayer" class="game-actions">
               <button v-for="action in currentCard.actions" 
