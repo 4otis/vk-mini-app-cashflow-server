@@ -10,7 +10,7 @@ CREATE TABLE market (
     type_id INTEGER,
     sell_cost INTEGER DEFAULT 0,
 
-    CONSTRAINT fk_asset_type FOREIGN KEY (type_id) REFERENCES assets_type(id) ON DELETE RESTRICT
+    CONSTRAINT fk_market_type FOREIGN KEY (type_id) REFERENCES assets_type(id) ON DELETE RESTRICT
 );
 
-CREATE INDEX idx_assets_type_id ON assets(type_id);
+CREATE INDEX idx_market_type_id ON market(type_id);

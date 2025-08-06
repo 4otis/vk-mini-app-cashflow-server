@@ -140,7 +140,7 @@ func RunIssueMigrations(db *gorm.DB) error {
 		for _, i := range issues {
 			if err := tx.Exec(`
 			INSERT INTO issues 
-			(created_at, updated_at, title, desc, price)
+			(created_at, updated_at, title, descr, price)
 			VALUES (?, ?, ?, ?, ?)`,
 				time.Now(), time.Now(),
 				i.Title, i.Descr, i.Price,
@@ -179,7 +179,7 @@ func RunMarketMigrations(db *gorm.DB) error {
 		for _, offer := range market {
 			if err := tx.Exec(`
 			INSERT INTO market 
-			(created_at, updated_at, title, desc, type_id, sell_cost)
+			(created_at, updated_at, title, descr, type_id, sell_cost)
 			VALUES (?, ?, ?, ?, ?, ?)`,
 				time.Now(), time.Now(),
 				offer.Title, offer.Descr, offer.TypeID, offer.SellCost,
