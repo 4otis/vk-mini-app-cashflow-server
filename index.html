@@ -585,6 +585,7 @@
             
             if (!response.ok) throw new Error('Ошибка сервера');
             
+            console.log("rollDiceResponse: ", response, "cur_card: ". response.cur_card)
             // Обновляем состояние игры
             processGameData(response);
           } catch (err) {
@@ -652,7 +653,7 @@
             console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
           }
           
-          if (data.cur_card && isCurrentPlayer.value) {
+          if (data.cur_card !== null && isCurrentPlayer.value) {
             console.log("cur_card not null")
             switch (data.cur_card.type) {
               case 'ASSET':
@@ -672,6 +673,7 @@
             data.current_card.type !== 'CHILD';
           } else {
             console.log("cur_card is null or isCurrentPlayer: ", isCurrentPlayer.value)
+            console.log("cur_card: ", data.cur_card)
             currentCard.value = null;
             showCardModal.value = false;
           }
