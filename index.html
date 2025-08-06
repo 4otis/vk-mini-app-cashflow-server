@@ -698,6 +698,10 @@
             }
 
             showCardModal.value = true;
+            console.log(currentCard.value)
+            console.log(currentCard.type)
+            console.log(currentCard.card)
+            console.log(currentCard.actions)
             canSkipCard.value = data.cur_card.type !== 'ISSUE';
           } else {
             currentCard.value = null;
