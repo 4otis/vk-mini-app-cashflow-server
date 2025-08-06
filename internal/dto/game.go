@@ -39,7 +39,7 @@ type EndTurnReq struct {
 
 type Card struct {
 	Type   string     `json:"type"`
-	Asset  AssetCard  `json:"asset_card,omitempty"`
-	Market MarketCard `json:"market_card,omitempty"`
-	Issue  IssueCard  `json:"issue_card,omitempty"`
+	Asset  AssetCard  `json:"asset,omitempty"`
+	Market MarketCard `json:"market,omitempty"`
+	Issue  IssueCard  `json:"issue,omitempty"`
 }
