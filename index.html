@@ -655,22 +655,35 @@
           
           if (data.cur_card !== null && isCurrentPlayer.value) {
             console.log("cur_card not null")
+
+            currentCard.value = {
+              type: data.cur_card.type,
+              value: null,
+              actions: []
+            }
+
             switch (data.cur_card.type) {
               case 'ASSET':
-                currentCard = data.asset_card
-              case 'ISSUE':
-                currentCard = data.issue_card
+                currentCard.value.value = data.cur_card.asset;
+                currentCard.value.actions = ['Купить', 'Отказаться'];
+                break;
               case 'MARKET':
-                currentCard = data.market_card
+                currentCard.value.value = data.cur_card.market;
+                currentCard.value.actions = ['Продать', 'Отказаться'];
+                break;
+              case 'ISSUE':
+                currentCard.value.value = data.cur_card.issue;
+                currentCard.value.actions = ['Оплатить'];
+                break;
             }
                   
-            console.log("CurrentCard: ", currentCard)
+            console.log("CurrentCard: ", currentCard.value)
             showCardModal.value = true;
             currentPlayer.value = data.player
             
             // Определяем, можно ли пропустить карточку
             canSkipCard.value = data.cur_card.type !== 'ISSUE' && 
-            data.current_card.type !== 'CHILD';
+            data.cur_card.type !== 'CHILD';
           } else {
             console.log("cur_card is null or isCurrentPlayer: ", isCurrentPlayer.value)
             console.log("cur_card: ", data.cur_card)

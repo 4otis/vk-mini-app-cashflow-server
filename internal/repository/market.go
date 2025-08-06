@@ -14,6 +14,6 @@ func NewMarketRepository(db *gorm.DB) *MarketRepository {
 }
 
 func (r *MarketRepository) ReadRandom() (market *models.Market, err error) {
-	err = r.db.Order("RANDOM()").First(&market).Error
+	err = r.db.Table("market").Order("RANDOM()").First(&market).Error
 	return market, err
 }
