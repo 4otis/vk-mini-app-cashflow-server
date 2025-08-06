@@ -257,7 +257,7 @@
             Выпало: {{ diceValue }}
           </div>
           
-          <div v-if="currentCard" class="player-info">
+          <!-- <div v-if="currentCard" class="player-info">
             <h3>Карта: {{ currentCard.type }}</h3>
             <p>{{ currentCard.description }}</p>
             <div v-if="currentCard.actions && isCurrentPlayer" class="game-actions">
@@ -267,7 +267,7 @@
                 {{ action }}
               </button>
             </div>
-          </div>
+          </div> -->
         </div>
       </div>
       
@@ -697,6 +697,7 @@
             }
 
             showCardModal.value = currentCard.value.value !== null;
+            console.log("showCardModal: ", showCardModal.value)
             canSkipCard.value = data.cur_card.type !== 'ISSUE';
           } else {
             currentCard.value = null;
