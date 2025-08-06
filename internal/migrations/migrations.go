@@ -21,15 +21,15 @@ func RunInitDbMigrations(db *gorm.DB) error {
 		return err
 	}
 
-	// err = RunIssueMigrations(db)
-	// if err != nil {
-	// 	return err
-	// }
+	err = RunIssueMigrations(db)
+	if err != nil {
+		return err
+	}
 
-	// err = RunMarketMigrations(db)
-	// if err != nil {
-	// 	return err
-	// }
+	err = RunMarketMigrations(db)
+	if err != nil {
+		return err
+	}
 
 	return nil
 }

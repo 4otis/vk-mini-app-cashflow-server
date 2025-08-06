@@ -586,7 +586,7 @@
             if (!response.ok) throw new Error('Ошибка сервера');
             
             // Обновляем состояние игры
-            loadGameState();
+            processGameData(response);
           } catch (err) {
             errorMessage.value = 'Ошибка при броске кубика: ' + err.message;
           }
@@ -653,6 +653,7 @@
           }
           
           if (data.cur_card && isCurrentPlayer.value) {
+            console.log("cur_card not null")
             switch (data.cur_card.type) {
               case 'ASSET':
                 currentCard = data.asset_card
@@ -661,8 +662,8 @@
               case 'MARKET':
                 currentCard = data.market_card
             }
-            
-            currentCard.value = data.cur_card;
+                  
+            console.log("CurrentCard: ", currentCard)
             showCardModal.value = true;
             currentPlayer.value = data.player
             
@@ -670,6 +671,7 @@
             canSkipCard.value = data.cur_card.type !== 'ISSUE' && 
             data.current_card.type !== 'CHILD';
           } else {
+            console.log("cur_card is null or isCurrentPlayer: ", isCurrentPlayer.value)
             currentCard.value = null;
             showCardModal.value = false;
           }
