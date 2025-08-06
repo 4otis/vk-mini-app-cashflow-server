@@ -663,37 +663,34 @@
 
             switch (data.cur_card.type) {
               case 'ASSET':
-                if (data.cur_card.asset) {
-                  currentCard.value.card = {
-                    title: data.cur_card.asset.title,
-                    descr: data.cur_card.asset.descr,
-                    price: data.cur_card.asset.price,
-                    cashflow: data.cur_card.asset.cashflow
-                  };
-                  currentCard.value.actions = ['Купить', 'Отказаться'];
-                }
+                currentCard.value.card = {
+                  title: data.cur_card.asset.title,
+                  descr: data.cur_card.asset.descr,
+                  price: data.cur_card.asset.price,
+                  cashflow: data.cur_card.asset.cashflow
+                };
+                currentCard.value.actions = ['Купить', 'Отказаться'];
+              
                 break;
                 
               case 'MARKET':
-                if (data.cur_card.market) {
-                  currentCard.value.card = {
-                    title: data.cur_card.market.title,
-                    descr: data.cur_card.market.descr,
-                    sell_cost: data.cur_card.market.sell_cost
-                  };
-                  currentCard.value.actions = ['Продать', 'Отказаться'];
-                }
+                currentCard.value.card = {
+                  title: data.cur_card.market.title,
+                  descr: data.cur_card.market.descr,
+                  sell_cost: data.cur_card.market.sell_cost
+                };
+                currentCard.value.actions = ['Продать', 'Отказаться'];
+              
                 break;
                 
               case 'ISSUE':
-                if (data.cur_card.issue) {
-                  currentCard.value.card = {
-                    title: data.cur_card.issue.title,
-                    descr: data.cur_card.issue.descr,
-                    price: data.cur_card.issue.price
-                  };
-                  currentCard.value.actions = ['Оплатить'];
-                }
+                currentCard.value.card = {
+                  title: data.cur_card.issue.title,
+                  descr: data.cur_card.issue.descr,
+                  price: data.cur_card.issue.price
+                };
+                currentCard.value.actions = ['Оплатить'];
+              
                 break;
             }
 
