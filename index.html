@@ -2,145 +2,299 @@
 <html>
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>Cashflow Game</title>
   <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
-  <!-- <script src="https://vk.com/js/api/openapi.js?169"></script> -->
-   <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
+  <script src="https://unpkg.com/@vkontakte/vk-bridge/dist/browser.min.js"></script>
   <style>
+    * {
+      box-sizing: border-box;
+    }
+    
     body {
       font-family: Arial, sans-serif;
-      padding: 20px;
+      padding: 10px;
       background-color: #f5f5f5;
       text-align: center;
+      margin: 0;
+      -webkit-text-size-adjust: 100%;
     }
+    
     .container {
-      max-width: 400px;
+      width: 100%;
+      max-width: 100%;
       margin: 0 auto;
       background: white;
-      padding: 20px;
+      padding: 15px;
       border-radius: 10px;
       box-shadow: 0 2px 10px rgba(0,0,0,0.1);
     }
+    
     h1 {
       color: #5181b8;
+      font-size: 1.5rem;
+      margin: 0.5rem 0;
     }
+    
+    h2 {
+      font-size: 1.3rem;
+    }
+    
+    h3 {
+      font-size: 1.1rem;
+      margin: 0.5rem 0;
+    }
+    
+    h4 {
+      font-size: 1rem;
+      margin: 0.3rem 0;
+    }
+    
     button {
-      padding: 12px 24px;
-      margin: 10px;
+      padding: 12px 15px;
+      margin: 8px 0;
       background-color: #5181b8;
       color: white;
       border: none;
       border-radius: 4px;
       cursor: pointer;
       font-size: 16px;
-      width: 80%;
+      width: 100%;
       transition: background-color 0.3s;
+      -webkit-tap-highlight-color: transparent;
     }
+    
+    button:active {
+      transform: scale(0.98);
+    }
+    
     button:hover {
       background-color: #3a6ea5;
     }
+    
     button.secondary {
       background-color: #6c757d;
     }
+    
     button.secondary:hover {
       background-color: #5a6268;
     }
+    
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    
     input {
       padding: 10px;
-      margin: 10px 0;
-      width: 80%;
+      margin: 8px 0;
+      width: 100%;
       border: 1px solid #ddd;
       border-radius: 4px;
+      font-size: 16px;
     }
+    
     .error {
       color: #dc3545;
-      margin: 10px 0;
+      margin: 8px 0;
+      font-size: 0.9rem;
     }
-       .game-container {
+    
+    .game-container {
       display: flex;
       flex-direction: column;
-      max-width: 800px;
-      margin: 20px auto;
+      width: 100%;
+      margin: 10px auto;
     }
     
     .game-board {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 20px;
-      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 15px;
+      margin-bottom: 15px;
     }
     
     .player-info {
       background: #fff;
       border-radius: 8px;
-      padding: 15px;
+      padding: 12px;
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+      margin-bottom: 10px;
     }
     
     .player-card {
       background: #5181b8;
       color: white;
-      padding: 10px;
+      padding: 8px;
       border-radius: 5px;
-      margin-bottom: 10px;
+      margin-bottom: 8px;
     }
     
     .player-stats {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 10px;
+      gap: 8px;
+      font-size: 0.9rem;
     }
     
     .stat-item {
       background: #f8f9fa;
-      padding: 8px;
+      padding: 6px;
       border-radius: 4px;
+      font-size: 0.9rem;
     }
     
     .game-actions {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-      gap: 10px;
-      margin-top: 20px;
+      grid-template-columns: 1fr;
+      gap: 8px;
+      margin-top: 15px;
     }
     
     .game-log {
-      max-height: 200px;
+      max-height: 150px;
       overflow-y: auto;
       background: #fff;
-      padding: 10px;
+      padding: 8px;
       border-radius: 5px;
-      margin-top: 20px;
+      margin-top: 15px;
       border: 1px solid #ddd;
+      font-size: 0.8rem;
     }
     
     .log-entry {
-      padding: 5px 0;
+      padding: 4px 0;
       border-bottom: 1px solid #eee;
+      font-size: 0.8rem;
     }
     
     .assets-list {
-      margin-top: 15px;
+      margin-top: 12px;
+      font-size: 0.9rem;
     }
     
     .asset-item {
       display: flex;
       justify-content: space-between;
-      padding: 8px;
+      padding: 6px;
       background: #f8f9fa;
-      margin-bottom: 5px;
+      margin-bottom: 4px;
       border-radius: 4px;
+      font-size: 0.8rem;
+      flex-wrap: wrap;
     }
     
     .current-player {
-      border: 3px solid #ffcc00;
+      border: 2px solid #ffcc00;
     }
     
     .dice-result {
-      font-size: 24px;
+      font-size: 1.5rem;
       font-weight: bold;
+      margin: 8px 0;
+    }
+    
+    /* Модальное окно для мобильных */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      padding: 15px;
+    }
+    
+    .modal-content {
+      background: white;
+      border-radius: 10px;
+      padding: 15px;
+      width: 100%;
+      max-width: 400px;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+    
+    .modal-close {
+      position: absolute;
+      top: 5px;
+      right: 5px;
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: #eee;
+      color: #333;
+      font-size: 1.2rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0;
+      margin: 0;
+    }
+    
+    .card-title {
+      color: #5181b8;
+      margin-top: 10px;
+    }
+    
+    .card-description {
       margin: 10px 0;
+      text-align: left;
+    }
+    
+    .card-cost {
+      font-weight: bold;
+      margin: 8px 0;
+    }
+    
+    .card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 15px;
+    }
+    
+    .players-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+    
+    @media (max-width: 480px) {
+      .players-grid {
+        grid-template-columns: 1fr;
+      }
+      
+      .player-stats {
+        grid-template-columns: 1fr;
+      }
+      
+      .container {
+        padding: 10px;
+      }
+      
+      button {
+        padding: 10px 12px;
+        font-size: 14px;
+      }
+    }
+    
+    /* Анимация кубика */
+    @keyframes diceRoll {
+      0% { transform: rotate(0deg); }
+      25% { transform: rotate(90deg); }
+      50% { transform: rotate(180deg); }
+      75% { transform: rotate(270deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .dice-rolling {
+      animation: diceRoll 0.5s ease-in-out;
     }
   </style>
 </head>
@@ -149,10 +303,8 @@
   vkBridge.send("VKWebAppInit", {});
   </script>
 
-
   <div id="app">
     <div class="container">
-
       <h1>Cashflow Game</h1>
       
       <div v-if="!sessionCode && !showJoinForm">
@@ -175,161 +327,126 @@
           <h3>Игроки в сессии:</h3>
           <ul style="list-style: none; padding: 0;">
             <li v-for="player in players" :key="player.id" 
-                style="padding: 8px; margin: 5px; background: #f8f9fa; border-radius: 4px;">
-              {{ player.nickname }} (ID: {{ player.vk_id }}) {{ player.ready ? "Готов" : "Не готов" }}
+                style="padding: 6px; margin: 4px; background: #f8f9fa; border-radius: 4px; font-size: 0.9rem;">
+              {{ player.nickname }} (ID: {{ player.vk_id }}) {{ player.ready ? "✓ Готов" : "✗ Не готов" }}
             </li>
           </ul>
-        <button @click="playerReady">Готов</button>
-        <button @click="allPlayersReady">Начать</button>
+          <button @click="playerReady">Готов</button>
+          <button @click="allPlayersReady">Начать</button>
         </div>
         <p class="error" v-if="errorMessage">{{ errorMessage }}</p>
       </div>
 
-
-
       <div v-if="gameStarted" class="game-container">
-      <h2>Игра началась!</h2>
-      
-      <div class="game-board">
-        <!-- Левая колонка - информация о текущем игроке -->
+        <h2>Игра началась!</h2>
+        
+        <div class="game-board">
+          <div class="player-info">
+            <h3>Ваш статус</h3>
+            <div :class="['player-card', isCurrentPlayer ? 'current-player' : '']">
+              <h4>{{ currentPlayer.nickname }}</h4>
+              <p>Баланс: {{ currentPlayer.balance }} тыс. ₽</p>
+              <p>Пассивный доход: {{ currentPlayer.passive_income }} тыс. ₽</p>
+            </div>
+            
+            <div class="player-stats">
+              <div class="stat-item">
+                <strong>Доход</strong>
+                <p>{{ currentPlayer.total_income }} тыс. ₽</p>
+              </div>
+              <div class="stat-item">
+                <strong>Расходы</strong>
+                <p>{{ currentPlayer.total_expenses }} тыс. ₽</p>
+              </div>
+              <div class="stat-item">
+                <strong>Дети</strong>
+                <p>{{ currentPlayer.child_amount }}</p>
+              </div>
+              <div class="stat-item">
+                <strong>Кредиты</strong>
+                <p>{{ currentPlayer.bank_loan }} тыс. ₽</p>
+              </div>
+            </div>
+            
+            <div class="assets-list">
+              <h4>Активы</h4>
+              <div v-for="asset in currentPlayer.assets" :key="asset.id" class="asset-item">
+                <span>{{ asset.title }}</span>
+                <span>+{{ asset.cashflow }} тыс. ₽</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="player-info">
+            <div v-if="isCurrentPlayer" class="game-actions">
+              <button @click="rollDice" :disabled="diceRolled || isRolling" :class="{ 'dice-rolling': isRolling }">
+                {{ isRolling ? '🎲 Бросаем...' : diceRolled ? '🎲 Уже брошен' : '🎲 Бросить кубик' }}
+              </button>
+
+              <button @click="endTurn" :disabled="!canEndTurn">⏭️ Закончить ход</button>
+              <button @click="loadGameState">🔄 Обновить</button>
+            </div>
+            
+            <div v-if="diceRolled" class="dice-result">
+              Выпало: {{ diceValue }}
+            </div>
+          </div>
+        </div>
+        
         <div class="player-info">
-          <h3>Ваш статус</h3>
-          <div :class="['player-card', isCurrentPlayer ? 'current-player' : '']">
-            <h4>{{ currentPlayer.nickname }}</h4>
-            <p>Баланс: {{ currentPlayer.balance }} тыс. ₽</p>
-            <p>Пассивный доход: {{ currentPlayer.passive_income }} тыс. ₽</p>
-          </div>
-          
-          <div class="player-stats">
-            <div class="stat-item">
-              <strong>Доход</strong>
-              <p>{{ currentPlayer.total_income }} тыс. ₽</p>
-            </div>
-            <div class="stat-item">
-              <strong>Расходы</strong>
-              <p>{{ currentPlayer.total_expenses }} тыс. ₽</p>
-            </div>
-            <div class="stat-item">
-              <strong>Дети</strong>
-              <p>{{ currentPlayer.child_amount }}</p>
-            </div>
-            <div class="stat-item">
-              <strong>Кредиты</strong>
-              <p>{{ currentPlayer.bank_loan }} тыс. ₽</p>
+          <h3>Игроки</h3>
+          <div class="players-grid">
+            <div v-for="player in gamePlayers" :key="player.id" class="player-card">
+              <h4>{{ player.nickname }}</h4>
+              <p>Баланс: {{ player.balance }} тыс. ₽</p>
+              <p>Пассивный доход: {{ player.passive_income }} тыс. ₽</p>
+              <p v-if="player.isBankrupt" style="color: red;">БАНКРОТ</p>
             </div>
           </div>
-          
-          <div class="assets-list">
-            <h4>Активы</h4>
-            <div v-for="asset in currentPlayer.assets" :key="asset.id" class="asset-item">
-              <span>{{ asset.title }}</span>
-              <span>+{{ asset.cashflow }} тыс. ₽</span>
-              <span>(Цена: {{ asset.cashflow }} тыс. ₽)</span>
-            </div>
-          </div>
-          
-          <!-- <div class="assets-list">
-            <h4>Пассивы</h4>
-            <div v-for="liability in currentPlayer.liabilities" :key="liability.id" class="asset-item">
-              <span>{{ liability.name }}</span>
-              <span>-{{ liability.expense }} тыс. ₽</span>
-            </div>
-          </div> -->
         </div>
 
-
-
-        <!-- Правая колонка - игровые действия и информация -->
-        <div>
-          <div v-if="isCurrentPlayer" class="game-actions">
-            <button @click="rollDice" :disabled="diceRolled || isRolling">
-              {{ isRolling ? 'Кубик летит...' : diceRolled ? 'Уже брошен' : 'Бросить кубик' }}
-            </button>
-
-            <button @click="endTurn" :disabled="!canEndTurn">Закончить ход</button>
-            <!-- <button @click="takeLoan">Взять кредит</button> -->
-            <!-- <button @click="sellAsset">Продать актив</button>
-            <button @click="showDeals">Показать сделки</button> -->
-            <button @click="loadGameState">Обновить</button>
+        <div class="game-log">
+          <h4>Журнал игры</h4>
+          <div v-for="(entry, index) in gameLog" :key="index" class="log-entry">
+            {{ entry }}
           </div>
-          
-          <div v-if="diceRolled" class="dice-result">
-            Выпало: {{ diceValue }}
-          </div>
-          
-          <div v-if="currentCard" class="player-info">
-            <h3>Карта: {{ currentCard.type }}</h3>
-            <!-- <p>{{ currentCard.value.card.descr }}</p> -->
-            <p>{{ currentCard.card.descr }}</p>
-            <div v-if="currentCard.actions && isCurrentPlayer" class="game-actions">
+        </div>
+
+        <div v-if="showCardModal" class="modal-overlay">
+          <div class="modal-content" :class="cardModalClass">
+            <button class="modal-close" @click="closeCardModal">&times;</button>
+            <h3 class="card-title">{{ currentCard.card.title }}</h3>
+            <p class="card-description">{{ currentCard.card.descr }}</p>
+            
+            <div v-if="currentCard.type === 'ASSET'">
+              <p class="card-cost">Стоимость: {{ currentCard.card.price }} тыс. ₽</p>
+              <p>Пассивный доход: +{{ currentCard.card.cashflow }} тыс. ₽</p>
+            </div>
+            
+            <div v-if="currentCard.type === 'MARKET'">
+              <p>Рыночная цена: {{ currentCard.card.sell_cost }} тыс. ₽</p>
+            </div>
+            
+            <div v-if="currentCard.type === 'ISSUE'">
+              <p class="card-cost">Стоимость: {{ currentCard.card.price }} тыс. ₽</p>
+            </div>
+            
+            <div class="card-actions">
               <button v-for="action in currentCard.actions" 
                       :key="action" 
                       @click="handleCardAction(action)">
                 {{ action }}
               </button>
+              <button v-if="canSkipCard" @click="skipCard" class="secondary">Пропустить</button>
             </div>
           </div>
         </div>
       </div>
-      
-      <!-- Список всех игроков -->
-      <div class="player-info">
-        <h3>Игроки</h3>
-        <div class="players-grid">
-          <div v-for="player in gamePlayers" :key="player.id" class="player-card">
-            <h4>{{ player.nickname }}</h4>
-            <p>Баланс: {{ player.balance }} тыс. ₽</p>
-            <p>Пассивный доход: {{ player.passive_income }} тыс. ₽</p>
-            <p v-if="player.isBankrupt" style="color: red;">БАНКРОТ</p>
-          </div>
-        </div>
-      </div>
-
-      <!-- Модальное окно для карточки -->
-      <div v-if="showCardModal" class="modal-overlay">
-        <div class="modal-content" :class="cardModalClass">
-          <button class="modal-close" @click="closeCardModal">&times;</button>
-          <h3 class="card-title">{{ currentCard.card.title }}</h3>
-          <!-- <img v-if="currentCard.image" :src="currentCard.image" class="card-image" alt="Card image"> -->
-          <p class="card-description">{{ currentCard.card.descr }}</p>
-          
-          <div v-if="currentCard.type === 'ASSET'">
-            <p class="card-cost">Стоимость: {{ currentCard.card.price }} тыс. ₽</p>
-            <p>Пассивный доход: +{{ currentCard.card.cashflow }} тыс. ₽</p>
-          </div>
-          
-          <div v-if="currentCard.type === 'MARKET'">
-            <p>Рыночная цена: {{ currentCard.card.sell_cost }} тыс. ₽</p>
-          </div>
-          
-          <div v-if="currentCard.type === 'ISSUE'">
-            <p class="card-cost">Стоимость: {{ currentCard.card.price }} тыс. ₽</p>
-          </div>
-          
-          <!-- <div v-if="currentCard.type === 'CHILD'">
-            <p>Теперь у вас {{ currentPlayer.child_amount + 1 }} детей</p>
-            <p>Ежемесячные расходы увеличатся на {{ currentCard.expense_increase }} тыс. ₽</p>
-          </div> -->
-          
-          <div class="card-actions">
-            <button v-for="action in currentCard.actions" 
-                    :key="action" 
-                    @click="handleCardAction(action)">
-              {{ action }}
-            </button>
-            <button v-if="canSkipCard" @click="skipCard" class="secondary">Пропустить</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-
     </div>
   </div>
-  </div>
+
   <script>
   const { createApp, ref, onMounted, computed } = Vue;
-  
   
   createApp({
     setup() {
@@ -369,7 +486,6 @@
         }
       });
 
-      // Проверяем, находимся ли мы внутри VK Mini App
       onMounted(() => {
         if (typeof VK !== 'undefined' && VK.WebApp) {
           isVK.value = true;
@@ -385,405 +501,404 @@
         }
       });
 
-        const startNewGame = async () => {
-          isLoading.value = true;
-          errorMessage.value = '';
-          
-          try {
-            user.value = await vkBridge.send('VKWebAppGetUserInfo');
-            console.log('VK ID:', user.value.id);
+      const startNewGame = async () => {
+        isLoading.value = true;
+        errorMessage.value = '';
+        
+        try {
+          user.value = await vkBridge.send('VKWebAppGetUserInfo');
+          console.log('VK ID:', user.value.id);
 
-            const response = await fetch('/sessions', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                vk_id: user.value.id, 
-                nickname: 'Игрок_' + vkId.value.toString().slice(-4)
-              })
-            });
-            
-            if (!response.ok) throw new Error('Ошибка сервера');
-            
-            const data = await response.json();
-            sessionCode.value = data.code;
-          } catch (err) {
-            errorMessage.value = 'Ошибка при создании игры: ' + err.message;
-          } finally {
-            isLoading.value = false;
-          }
-        };
-
-        const joinGame = async () => {
-          if (!joinCode.value.trim()) {
-            joinError.value = 'Введите код игры';
-            return;
-          }
+          const response = await fetch('/sessions', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              vk_id: user.value.id, 
+              nickname: 'Игрок_' + vkId.value.toString().slice(-4)
+            })
+          });
           
-          isLoading.value = true;
-          joinError.value = '';
+          if (!response.ok) throw new Error('Ошибка сервера');
           
-          try {
-            user.value = await vkBridge.send('VKWebAppGetUserInfo');
-            console.log('VK ID:', user.value.id);
-
-            const response = await fetch(`/sessions/${joinCode.value}/join`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                vk_id: user.value.id, 
-                nickname: 'Игрок_' + vkId.value.toString().slice(-4)
-              })
-            });
-            
-            if (!response.ok) {
-              const error = await response.json();
-              throw new Error(error.message || 'Не удалось подключиться');
-            }
-            
-            const data = await response.json();
-            sessionCode.value = joinCode.value;
-            players.value = data.players || [];
-          } catch (err) {
-            joinError.value = err.message;
-          } finally {
-            isLoading.value = false;
-          }
-        };
-
-        const getPlayers = async () => {
-          if (!sessionCode.value) return;
-          
-          try {
-            const response = await fetch(`/sessions/${sessionCode.value}/players`);
-            players.value = await response.json();
-          } catch (err) {
-            errorMessage.value = 'Ошибка при загрузке игроков';
-          }
-        };
-
-        const allPlayersReady = async () => {
-          if (!sessionCode.value) return;
-          
-          isLoading.value = true;
-          
-          try {
-            getPlayers();
-
-
-            user.value = await vkBridge.send('VKWebAppGetUserInfo');
-            const response = await fetch(`/game/${sessionCode.value}/everyoneready`, {
-              method: 'GET',
-            });
-          
-            data = await response.json();
-            
-            if (data.ready) {
-              gameStarted.value = true;
-              initGameState();
-            } else {
-              console.log("Не все игроки приготовились к игре!")
-            }
-                        
-          } catch {
-            errorMessage.value = 'Ошибка при проверке статуса готовности игроков';
-          } finally {
-            isLoading.value = false;
-          }
+          const data = await response.json();
+          sessionCode.value = data.code;
+        } catch (err) {
+          errorMessage.value = 'Ошибка при создании игры: ' + err.message;
+        } finally {
+          isLoading.value = false;
         }
+      };
 
-        const playerReady = async () => {
-          if (!sessionCode.value) return;
-          
-          isLoading.value = true;
-          
-          try {
-            user.value = await vkBridge.send('VKWebAppGetUserInfo');
-            const response = await fetch(`/game/${sessionCode.value}/ready`, {
-              method: 'PATCH',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ 
-                vk_id: user.value.id
-              })
-            });
-          
-            players.value = await response.json();  
-            startPollingReady();     
-          } catch {
-            errorMessage.value = 'Ошибка при отправке статуса готовности';
-          } finally {
-            isLoading.value = false;
-          }
+      const joinGame = async () => {
+        if (!joinCode.value.trim()) {
+          joinError.value = 'Введите код игры';
+          return;
         }
+        
+        isLoading.value = true;
+        joinError.value = '';
+        
+        try {
+          user.value = await vkBridge.send('VKWebAppGetUserInfo');
+          console.log('VK ID:', user.value.id);
 
-        const initGameState = async () => {
-          try {
-            stopPollingReady();
-
-            const response = await fetch(`/game/${sessionCode.value}/initgame`, {
-              method: 'GET',
-            }
-            );
-            const data = await response.json();
-    
-            processGameData(data)
-            startPollingState();
-
-          } catch (err) {
-            errorMessage.value = 'Ошибка загрузки состояния игры';
-            console.error(err);
-          }
-        };
-
-        const loadGameState = async () => {
-          stopPollingReady();
-
-          try {
-            const response = await fetch(`/game/${sessionCode.value}/state`, {
-              method: 'GET',
-            }
-            );
-            const data = await response.json();
-    
-            processGameData(data)
-            startPollingState();
-
-          } catch (err) {
-            errorMessage.value = 'Ошибка загрузки состояния игры';
-            console.error(err);
-          }
-        };
-
-        const rollDice = async () => {
-          if (isRolling.value) return;
+          const response = await fetch(`/sessions/${joinCode.value}/join`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              vk_id: user.value.id, 
+              nickname: 'Игрок_' + vkId.value.toString().slice(-4)
+            })
+          });
           
-          isRolling.value = true;
-          diceRolled.value = false;
-
-          stopPollingState();
-          
-          // Анимация броска (3 случайных числа перед финальным)
-          for (let i = 0; i < 3; i++) {
-            diceValue.value = Math.floor(Math.random() * 6) + 1;
-            await new Promise(resolve => setTimeout(resolve, 200));
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Не удалось подключиться');
           }
           
-          // Финальное значение
-          diceValue.value = Math.floor(Math.random() * 6) + 1;
-          diceRolled.value = true;
-          canEndTurn.value = true;
-          isRolling.value = false;
+          const data = await response.json();
+          sessionCode.value = joinCode.value;
+          players.value = data.players || [];
+        } catch (err) {
+          joinError.value = err.message;
+        } finally {
+          isLoading.value = false;
+        }
+      };
+
+      const getPlayers = async () => {
+        if (!sessionCode.value) return;
+        
+        try {
+          const response = await fetch(`/sessions/${sessionCode.value}/players`);
+          players.value = await response.json();
+        } catch (err) {
+          errorMessage.value = 'Ошибка при загрузке игроков';
+        }
+      };
+
+      const allPlayersReady = async () => {
+        if (!sessionCode.value) return;
+        
+        isLoading.value = true;
+        
+        try {
+          getPlayers();
+
+          user.value = await vkBridge.send('VKWebAppGetUserInfo');
+          const response = await fetch(`/game/${sessionCode.value}/everyoneready`, {
+            method: 'GET',
+          });
+        
+          data = await response.json();
           
-          try {
-            // Отправляем результат на сервер
-            const response = await fetch(`/game/${sessionCode.value}/roll`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({
-                vk_id: user.value.id,
-                dice_value: diceValue.value
-              })
-            });
-            
-            if (!response.ok) throw new Error('Ошибка сервера');
-            
-            const data = await response.json();
-            processGameData(data)
-          } catch (err) {
-            errorMessage.value = 'Ошибка при броске кубика: ' + err.message;
-          }
-        };
-
-        const endTurn = async () => {
-          if (!canEndTurn.value) {
-            errorMessage.value = 'Сначала нужно бросить кубик!';
-            return;
-          }
-          
-          try {
-            const response = await fetch(`/game/${sessionCode.value}/endturn`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ vk_id: user.value.id })
-            });
-            
-            if (!response.ok) throw new Error('Ошибка сервера');
-            
-            // Сбрасываем состояния
-            diceRolled.value = false;
-            canEndTurn.value = false;
-            diceValue.value = 0;
-            isCurrentPlayer.value = false
-            // Обновляем состояние игры
-            await loadGameState();
-          } catch (err) {
-            errorMessage.value = 'Ошибка при завершении хода: ' + err.message;
-          }
-        };
-
-        const startPollingState = async () => {
-          stopPollingState();
-          pollStateInterval.value = setInterval(loadGameState, 3000);
-        };
-
-        const stopPollingState = async () => {
-          clearInterval(pollStateInterval.value);
-        };
-
-        const startPollingReady = async () => {
-          stopPollingReady();
-          console.log("startPollingReady!")
-          pollReadyInterval.value = setInterval(allPlayersReady, 2000);
-        };
-
-        const stopPollingReady = async () => {
-          clearInterval(pollReadyInterval.value);
-        };
-
-        const processGameData = async (data) => {
-          console.log("Game state data:", data);
-          if (data.players !== null && Array.isArray(data?.players)) {
-
-            if (ourPlayerIndex.value === null) {
-              ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
-            }
-          
-            currentPlayer.value = data.players[ourPlayerIndex.value];
-            console.log(currentPlayer)
-            gamePlayers.value = data.players;
-            isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value;
-            console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
-          }
-          
-          if (data.cur_card && data.cur_card.type && isCurrentPlayer.value) {
-            currentCard.value = {
-              type: data.cur_card.type,
-              card: null,
-              actions: []
-            };
-
-            switch (data.cur_card.type) {
-              case 'ASSET':
-                currentCard.value.card = {
-                  title: data.cur_card.asset.title,
-                  descr: data.cur_card.asset.descr,
-                  price: data.cur_card.asset.price,
-                  cashflow: data.cur_card.asset.cashflow
-                };
-                currentCard.value.actions = ['Купить', 'Отказаться'];
-              
-                break;
-                
-              case 'MARKET':
-                currentCard.value.card = {
-                  title: data.cur_card.market.title,
-                  descr: data.cur_card.market.descr,
-                  sell_cost: data.cur_card.market.sell_cost
-                };
-                currentCard.value.actions = ['Продать', 'Отказаться'];
-              
-                break;
-                
-              case 'ISSUE':
-                currentCard.value.card = {
-                  title: data.cur_card.issue.title,
-                  descr: data.cur_card.issue.descr,
-                  price: data.cur_card.issue.price
-                };
-                currentCard.value.actions = ['Оплатить'];
-              
-                break;
-            }
-
-            showCardModal.value = true;
-            console.log(currentCard.value)
-            console.log(currentCard.value.type)
-            console.log(currentCard.value.card)
-            console.log(currentCard.value.card.title)
-            canSkipCard.value = data.cur_card.type !== 'ISSUE';
+          if (data.ready) {
+            gameStarted.value = true;
+            initGameState();
           } else {
-            currentCard.value = null;
-            showCardModal.value = false;
+            console.log("Не все игроки приготовились к игре!")
           }
-
-          gameLog.value = data.log || [];
-        };
-        
-
-        const handleCardAction = async (action) => {
-          try {
-            let endpoint = '';
-            let body = { vk_id: user.value.id };
-            
-            switch(action) {
-              case 'Купить':
-                endpoint = '/buy';
-                break;
-              case 'Продать':
-                endpoint = '/sell';
-                break;
-              case 'Отказаться':
-                endpoint = '/skip';
-                break;
-              case 'Оплатить':
-                endpoint = '/pay';
-                break;
-              case 'Родить ребенка':
-                endpoint = '/addchild';
-                break;
-            }
-            
-            const response = await fetch(`/game/${sessionCode.value}${endpoint}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(body)
-            });
-            
-            if (!response.ok) throw new Error('Ошибка сервера');
-            
-            // Обновляем состояние игры
-            await loadGameState();
-            showCardModal.value = false;
-          } catch (err) {
-            errorMessage.value = 'Ошибка при обработке действия: ' + err.message;
-          }
-        };
-        
-        const skipCard = async () => {
-          try {
-            const response = await fetch(`/game/${sessionCode.value}/skip`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ vk_id: user.value.id })
-            });
-            
-            if (!response.ok) throw new Error('Ошибка сервера');
-            
-            await loadGameState();
-            showCardModal.value = false;
-          } catch (err) {
-            errorMessage.value = 'Ошибка при пропуске карточки: ' + err.message;
-          }
-        };
-        
-        const closeCardModal = () => {
-          if (canSkipCard.value) {
-            skipCard();
-          }
-          showCardModal.value = false;
-        };
-        
-        return { 
-          sessionCode, players, startNewGame, joinGame, getPlayers, playerReady,
-          isLoading, errorMessage, showJoinForm, joinCode, joinError,gameStarted,
-          currentPlayer, isCurrentPlayer, gamePlayers, currentCard, diceRolled,
-          diceValue, rollDice, endTurn, loadGameState, canEndTurn, isRolling,
-          initGameState, allPlayersReady, startPollingState, stopPollingState,
-          processGameData, startPollingReady, stopPollingReady, pollReadyInterval,
-          pollStateInterval, showCardModal, cardModalClass, canSkipCard,
-          handleCardAction, skipCard, closeCardModal
-        };
+                      
+        } catch {
+          errorMessage.value = 'Ошибка при проверке статуса готовности игроков';
+        } finally {
+          isLoading.value = false;
+        }
       }
-    }).mount('#app');
+
+      const playerReady = async () => {
+        if (!sessionCode.value) return;
+        
+        isLoading.value = true;
+        
+        try {
+          user.value = await vkBridge.send('VKWebAppGetUserInfo');
+          const response = await fetch(`/game/${sessionCode.value}/ready`, {
+            method: 'PATCH',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              vk_id: user.value.id
+            })
+          });
+        
+          players.value = await response.json();  
+          startPollingReady();     
+        } catch {
+          errorMessage.value = 'Ошибка при отправке статуса готовности';
+        } finally {
+          isLoading.value = false;
+        }
+      }
+
+      const initGameState = async () => {
+        try {
+          stopPollingReady();
+
+          const response = await fetch(`/game/${sessionCode.value}/initgame`, {
+            method: 'GET',
+          }
+          );
+          const data = await response.json();
+  
+          processGameData(data)
+          startPollingState();
+
+        } catch (err) {
+          errorMessage.value = 'Ошибка загрузки состояния игры';
+          console.error(err);
+        }
+      };
+
+      const loadGameState = async () => {
+        stopPollingReady();
+
+        try {
+          const response = await fetch(`/game/${sessionCode.value}/state`, {
+            method: 'GET',
+          }
+          );
+          const data = await response.json();
+  
+          processGameData(data)
+          startPollingState();
+
+        } catch (err) {
+          errorMessage.value = 'Ошибка загрузки состояния игры';
+          console.error(err);
+        }
+      };
+
+      const rollDice = async () => {
+        if (isRolling.value) return;
+        
+        isRolling.value = true;
+        diceRolled.value = false;
+
+        stopPollingState();
+        
+        // Анимация броска (3 случайных числа перед финальным)
+        for (let i = 0; i < 3; i++) {
+          diceValue.value = Math.floor(Math.random() * 6) + 1;
+          await new Promise(resolve => setTimeout(resolve, 200));
+        }
+        
+        // Финальное значение
+        diceValue.value = Math.floor(Math.random() * 6) + 1;
+        diceRolled.value = true;
+        canEndTurn.value = true;
+        isRolling.value = false;
+        
+        try {
+          // Отправляем результат на сервер
+          const response = await fetch(`/game/${sessionCode.value}/roll`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              vk_id: user.value.id,
+              dice_value: diceValue.value
+            })
+          });
+          
+          if (!response.ok) throw new Error('Ошибка сервера');
+          
+          const data = await response.json();
+          processGameData(data)
+        } catch (err) {
+          errorMessage.value = 'Ошибка при броске кубика: ' + err.message;
+        }
+      };
+
+      const endTurn = async () => {
+        if (!canEndTurn.value) {
+          errorMessage.value = 'Сначала нужно бросить кубик!';
+          return;
+        }
+        
+        try {
+          const response = await fetch(`/game/${sessionCode.value}/endturn`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vk_id: user.value.id })
+          });
+          
+          if (!response.ok) throw new Error('Ошибка сервера');
+          
+          // Сбрасываем состояния
+          diceRolled.value = false;
+          canEndTurn.value = false;
+          diceValue.value = 0;
+          isCurrentPlayer.value = false
+          // Обновляем состояние игры
+          await loadGameState();
+        } catch (err) {
+          errorMessage.value = 'Ошибка при завершении хода: ' + err.message;
+        }
+      };
+
+      const startPollingState = async () => {
+        stopPollingState();
+        pollStateInterval.value = setInterval(loadGameState, 3000);
+      };
+
+      const stopPollingState = async () => {
+        clearInterval(pollStateInterval.value);
+      };
+
+      const startPollingReady = async () => {
+        stopPollingReady();
+        console.log("startPollingReady!")
+        pollReadyInterval.value = setInterval(allPlayersReady, 2000);
+      };
+
+      const stopPollingReady = async () => {
+        clearInterval(pollReadyInterval.value);
+      };
+
+      const processGameData = async (data) => {
+        console.log("Game state data:", data);
+        if (data.players !== null && Array.isArray(data?.players)) {
+
+          if (ourPlayerIndex.value === null) {
+            ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
+          }
+        
+          currentPlayer.value = data.players[ourPlayerIndex.value];
+          console.log(currentPlayer)
+          gamePlayers.value = data.players;
+          isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value;
+          console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
+        }
+        
+        if (data.cur_card && data.cur_card.type && isCurrentPlayer.value) {
+          currentCard.value = {
+            type: data.cur_card.type,
+            card: null,
+            actions: []
+          };
+
+          switch (data.cur_card.type) {
+            case 'ASSET':
+              currentCard.value.card = {
+                title: data.cur_card.asset.title,
+                descr: data.cur_card.asset.descr,
+                price: data.cur_card.asset.price,
+                cashflow: data.cur_card.asset.cashflow
+              };
+              currentCard.value.actions = ['Купить', 'Отказаться'];
+            
+              break;
+              
+            case 'MARKET':
+              currentCard.value.card = {
+                title: data.cur_card.market.title,
+                descr: data.cur_card.market.descr,
+                sell_cost: data.cur_card.market.sell_cost
+              };
+              currentCard.value.actions = ['Продать', 'Отказаться'];
+            
+              break;
+              
+            case 'ISSUE':
+              currentCard.value.card = {
+                title: data.cur_card.issue.title,
+                descr: data.cur_card.issue.descr,
+                price: data.cur_card.issue.price
+              };
+              currentCard.value.actions = ['Оплатить'];
+            
+              break;
+          }
+
+          showCardModal.value = true;
+          console.log(currentCard.value)
+          console.log(currentCard.value.type)
+          console.log(currentCard.value.card)
+          console.log(currentCard.value.card.title)
+          canSkipCard.value = data.cur_card.type !== 'ISSUE';
+        } else {
+          currentCard.value = null;
+          showCardModal.value = false;
+        }
+
+        gameLog.value = data.log || [];
+      };
+      
+
+      const handleCardAction = async (action) => {
+        try {
+          let endpoint = '';
+          let body = { vk_id: user.value.id };
+          
+          switch(action) {
+            case 'Купить':
+              endpoint = '/buy';
+              break;
+            case 'Продать':
+              endpoint = '/sell';
+              break;
+            case 'Отказаться':
+              endpoint = '/skip';
+              break;
+            case 'Оплатить':
+              endpoint = '/pay';
+              break;
+            case 'Родить ребенка':
+              endpoint = '/addchild';
+              break;
+          }
+          
+          const response = await fetch(`/game/${sessionCode.value}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+          
+          if (!response.ok) throw new Error('Ошибка сервера');
+          
+          // Обновляем состояние игры
+          await loadGameState();
+          showCardModal.value = false;
+        } catch (err) {
+          errorMessage.value = 'Ошибка при обработке действия: ' + err.message;
+        }
+      };
+      
+      const skipCard = async () => {
+        try {
+          const response = await fetch(`/game/${sessionCode.value}/skip`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ vk_id: user.value.id })
+          });
+          
+          if (!response.ok) throw new Error('Ошибка сервера');
+          
+          await loadGameState();
+          showCardModal.value = false;
+        } catch (err) {
+          errorMessage.value = 'Ошибка при пропуске карточки: ' + err.message;
+        }
+      };
+      
+      const closeCardModal = () => {
+        if (canSkipCard.value) {
+          skipCard();
+        }
+        showCardModal.value = false;
+      };
+      
+      return { 
+        sessionCode, players, startNewGame, joinGame, getPlayers, playerReady,
+        isLoading, errorMessage, showJoinForm, joinCode, joinError,gameStarted,
+        currentPlayer, isCurrentPlayer, gamePlayers, currentCard, diceRolled,
+        diceValue, rollDice, endTurn, loadGameState, canEndTurn, isRolling,
+        initGameState, allPlayersReady, startPollingState, stopPollingState,
+        processGameData, startPollingReady, stopPollingReady, pollReadyInterval,
+        pollStateInterval, showCardModal, cardModalClass, canSkipCard,
+        handleCardAction, skipCard, closeCardModal, gameLog
+      };
+    }
+  }).mount('#app');
   </script>
 </body>
 </html>
