@@ -640,7 +640,7 @@
 
         const processGameData = async (data) => {
           console.log("Game state data:", data);
-          if (data.players !== null) {
+          if (data.players !== null && Array.isArray(data?.players)) {
 
             if (ourPlayerIndex.value === null) {
               ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
