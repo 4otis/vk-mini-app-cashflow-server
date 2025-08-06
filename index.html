@@ -543,6 +543,7 @@
             );
             const data = await response.json();
     
+            console.log("Game state data:", data);
             processGameData(data)
             startPollingState();
 
@@ -653,7 +654,9 @@
             console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
           }
           
-          if (data.cur_card !== null && isCurrentPlayer.value) {
+          if (data.cur_card && typeof data.cur_card === 'object' && 
+              Object.keys(data.cur_card).length > 0 &&
+              data.cur_card.type && isCurrentPlayer.value) {
             console.log("cur_card not null")
 
             currentCard.value = {
