@@ -257,9 +257,10 @@
             Выпало: {{ diceValue }}
           </div>
           
-          <!-- <div v-if="currentCard" class="player-info">
+          <div v-if="currentCard" class="player-info">
             <h3>Карта: {{ currentCard.type }}</h3>
-            <p>{{ currentCard.description }}</p>
+            <p>{{ currentCard.value.card.descr }}</p>
+            <p>{{ currentCard.card.descr }}</p>
             <div v-if="currentCard.actions && isCurrentPlayer" class="game-actions">
               <button v-for="action in currentCard.actions" 
                       :key="action" 
@@ -267,7 +268,7 @@
                 {{ action }}
               </button>
             </div>
-          </div> -->
+          </div>
         </div>
       </div>
       
@@ -656,14 +657,14 @@
           if (data.cur_card && data.cur_card.type && isCurrentPlayer.value) {
             currentCard.value = {
               type: data.cur_card.type,
-              value: null,
+              card: null,
               actions: []
             };
 
             switch (data.cur_card.type) {
               case 'ASSET':
                 if (data.cur_card.asset) {
-                  currentCard.value.value = {
+                  currentCard.value.card = {
                     title: data.cur_card.asset.title,
                     descr: data.cur_card.asset.descr,
                     price: data.cur_card.asset.price,
@@ -675,7 +676,7 @@
                 
               case 'MARKET':
                 if (data.cur_card.market) {
-                  currentCard.value.value = {
+                  currentCard.value.card = {
                     title: data.cur_card.market.title,
                     descr: data.cur_card.market.descr,
                     sell_cost: data.cur_card.market.sell_cost
@@ -686,7 +687,7 @@
                 
               case 'ISSUE':
                 if (data.cur_card.issue) {
-                  currentCard.value.value = {
+                  currentCard.value.card = {
                     title: data.cur_card.issue.title,
                     descr: data.cur_card.issue.descr,
                     price: data.cur_card.issue.price
