@@ -289,21 +289,21 @@
       <div v-if="showCardModal" class="modal-overlay">
         <div class="modal-content" :class="cardModalClass">
           <button class="modal-close" @click="closeCardModal">&times;</button>
-          <h3 class="card-title">{{ currentCard.value.card.title }}</h3>
+          <h3 class="card-title">{{ currentCard.card.title }}</h3>
           <!-- <img v-if="currentCard.image" :src="currentCard.image" class="card-image" alt="Card image"> -->
-          <p class="card-description">{{ currentCard.value.card.descr }}</p>
+          <p class="card-description">{{ currentCard.card.descr }}</p>
           
           <div v-if="currentCard.type === 'ASSET'">
-            <p class="card-cost">Стоимость: {{ currentCard.value.card.price }} тыс. ₽</p>
-            <p>Пассивный доход: +{{ currentCard.value.card.cashflow }} тыс. ₽</p>
+            <p class="card-cost">Стоимость: {{ currentCard.card.price }} тыс. ₽</p>
+            <p>Пассивный доход: +{{ currentCard.card.cashflow }} тыс. ₽</p>
           </div>
           
           <div v-if="currentCard.type === 'MARKET'">
-            <p>Рыночная цена: {{ currentCard.value.card.sell_cost }} тыс. ₽</p>
+            <p>Рыночная цена: {{ currentCard.card.sell_cost }} тыс. ₽</p>
           </div>
           
           <div v-if="currentCard.type === 'ISSUE'">
-            <p class="card-cost">Стоимость: {{ currentCard.value.card.price }} тыс. ₽</p>
+            <p class="card-cost">Стоимость: {{ currentCard.card.price }} тыс. ₽</p>
           </div>
           
           <!-- <div v-if="currentCard.type === 'CHILD'">
