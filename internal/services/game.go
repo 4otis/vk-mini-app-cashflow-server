@@ -149,6 +149,20 @@ func (s *GameService) LoadGameState(ctx context.Context, code string) (dto.GameS
 
 	for _, p := range players {
 		// TODO: получаю assets конкретного игрока по p.ID
+		assetsDb, err := s.assetRepo.ReadAllByPlayerID(p.ID)
+		if err != nil {
+			return response, err
+		}
+
+		var assets []dto.AssetStat
+		for _, a := range assetsDb {
+			assets = append(assets, dto.AssetStat{
+				Title:    a.Title,
+				Price:    a.Price,
+				Cashflow: a.Cashflow,
+			})
+		}
+
 		response.Players = append(response.Players, dto.PlayerStat{
 			VKID:          p.VKID,
 			Nickname:      p.Nickname,
@@ -161,7 +175,7 @@ func (s *GameService) LoadGameState(ctx context.Context, code string) (dto.GameS
 			ChildAmount:   p.ChildAmount,
 			BankLoan:      p.BankLoan,
 			// TODO: добавляю сформированный список []AssetStat
-			// Assets: []AssetStat,
+			Assets: assets,
 		})
 	}
 
