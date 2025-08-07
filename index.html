@@ -449,7 +449,7 @@
 
               <button @click="endTurn" :disabled="!canEndTurn">⏭️ Закончить ход</button>
               <button @click="showCurrentCard" :disabled="!hasCurrentCard">🃏 Показать карточку</button>
-              <button @click="loadGameState :disabled="hasCurrentCard">🔄 Обновить</button>
+              <button @click="loadGameState" :disabled="hasCurrentCard">🔄 Обновить</button>
             </div>
             
             <div v-if="diceRolled" class="dice-result">
