@@ -1,5 +1,5 @@
 -- Удаляем таблицы, если существуют (в правильном порядке)
--- DROP TABLE IF EXISTS players_assets;
+DROP TABLE IF EXISTS players_assets cascade;
 DROP TABLE IF EXISTS assets CASCADE;
 DROP TABLE IF EXISTS assets_type CASCADE;
 
@@ -32,6 +32,7 @@ create table players_assets (
     player_id integer not null,
     primary key (asset_id, player_id),
     constraint fk_asset foreign key (asset_id) references assets(id) on delete cascade
+    constraint fk_player foreign key (player_id) references players(id) on delete cascade
 );
 
 -- Создаем индекс для type_id
