@@ -1011,9 +1011,13 @@
         errorMessage.value = message;
         isRedFlash.value = true;
         isShaking.value = true;
+
+
+        console.log("alo")
         
         // Воспроизводим звук ошибки
         if (errorSound.value) {
+          console.log("alo2")
           errorSound.value.currentTime = 0;
           errorSound.value.play().catch(e => console.log("Audio play error:", e));
         }
