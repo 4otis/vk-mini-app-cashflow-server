@@ -24,9 +24,18 @@ CREATE TABLE assets (
     type_id INTEGER,
     price INTEGER DEFAULT 0,
     cashflow INTEGER DEFAULT 0,
-
     CONSTRAINT fk_asset_type FOREIGN KEY (type_id) REFERENCES assets_type(id) ON DELETE RESTRICT
+);
+
+create table players_assets (
+    asset_id integer not null,
+    player_id integer not null,
+    primary key (asset_id, player_id),
+    constraint fk_asset foreign key (asset_id) references assets(id) on delete cascade
 );
 
 -- Создаем индекс для type_id
 CREATE INDEX idx_assets_type_id ON assets(type_id);
+
+-- alter table cashflow.players add constraint fk_character_id foreign key (character_id) references characters(id) on delete cascade;
+-- alter table cashflow.players add constraint fk_character_id foreign key (character_id) references characters(id) on delete cascade;

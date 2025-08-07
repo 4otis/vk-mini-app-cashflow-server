@@ -16,7 +16,7 @@ func RunInitDbMigrations(db *gorm.DB) error {
 		return err
 	}
 
-	err = RunCharaterMigrations(db)
+	err = RunCharacterMigrations(db)
 	if err != nil {
 		return err
 	}
@@ -74,7 +74,7 @@ func RunAssetMigrations(db *gorm.DB) error {
 	})
 }
 
-func RunCharaterMigrations(db *gorm.DB) error {
+func RunCharacterMigrations(db *gorm.DB) error {
 	return db.Transaction(func(tx *gorm.DB) error {
 		sqlPath := filepath.Join("internal", "migrations", "sql", "init_characters.sql")
 		sqlBytes, err := os.ReadFile(sqlPath)

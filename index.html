@@ -366,12 +366,12 @@
     Ваш браузер не поддерживает аудио элемент.
   </audio> -->
 
-  <audio id="errorSound" class="audio-element" preload="auto">
+  <!-- <audio id="errorSound" class="audio-element" preload="auto">
     <source src="https://drive.google.com/uc?export=download&id=1EmwuOhGDIhDDxPZ-MnFEUKMfMomjfXTa" type="audio/mpeg">
   </audio>
   <audio id="successSound" class="audio-element" preload="auto">
     <source src="https://drive.google.com/uc?export=download&id=1EmwuOhGDIhDDxPZ-MnFEUKMfMomjfXTa" type="audio/mpeg">
-  </audio>
+  </audio> -->
 
   <script>
   vkBridge.send("VKWebAppInit", {});
@@ -610,32 +610,6 @@
       const hasMatchingAssets = computed(() => matchingAssets.value.length > 0);
 
       onMounted(() => {          
-          if (isVK.value && VK.Bridge) {
-            // Загружаем звук ошибки
-            VK.Bridge.send('VKWebAppDownloadFile', {
-              url: 'https://drive.google.com/uc?export=download&id=1EmwuOhGDIhDDxPZ-MnFEUKMfMomjfXTa',
-              filename: 'error.mp3'
-            }).then(data => {
-              errorSound.value = new Audio(data.file);
-            }).catch(err => {
-              console.error("Ошибка загрузки звука ошибки:", err);
-            });
-
-            // Загружаем звук успеха
-            VK.Bridge.send('VKWebAppDownloadFile', {
-              url: 'https://drive.google.com/uc?export=download&id=1EmwuOhGDIhDDxPZ-MnFEUKMfMomjfXTa',
-              filename: 'success.mp3'
-            }).then(data => {
-              successSound.value = new Audio(data.file);
-            }).catch(err => {
-              console.error("Ошибка загрузки звука успеха:", err);
-            });
-          } else {
-            // Для браузера (если не в VK)
-            errorSound.value = document.getElementById('errorSound');
-            successSound.value = document.getElementById('successSound');
-          }
-
         if (typeof VK !== 'undefined' && VK.WebApp) {
           isVK.value = true;
           VK.WebApp.init()
@@ -655,7 +629,6 @@
         errorMessage.value = '';
         
         try {
-          showError("startNewGame");
           user.value = await vkBridge.send('VKWebAppGetUserInfo');
           console.log('VK ID:', user.value.id);
 
@@ -682,7 +655,6 @@
       const joinGame = async () => {
         if (!joinCode.value.trim()) {
           joinError.value = 'Введите код игры';
-          showError("babah");
           return;
         }
         
@@ -1013,11 +985,8 @@
         isShaking.value = true;
 
 
-        console.log("alo")
-        
         // Воспроизводим звук ошибки
         if (errorSound.value) {
-          console.log("alo2")
           errorSound.value.currentTime = 0;
           errorSound.value.play().catch(e => console.log("Audio play error:", e));
         }

@@ -53,20 +53,6 @@ func (s *GameService) PlayerIsReady(ctx context.Context, code string, VKID int) 
 		return nil, err
 	}
 
-	// if !player.Ready {
-
-	// 	for _, pl := range players {
-	// 		if !pl.Ready {
-	// 			break
-	// 		}
-	// 	}
-
-	// 	log.Printf("ALL PLAYERS ARE READY!!!")
-	// 	log.Printf("ALL PLAYERS ARE READY!!!")
-	// 	log.Printf("ALL PLAYERS ARE READY!!!")
-
-	// }
-
 	result := make([]dto.PlayerResponse, 0, len(players))
 	for _, p := range players {
 		result = append(result, *convertPlayerToDTO(&p))
@@ -162,6 +148,7 @@ func (s *GameService) LoadGameState(ctx context.Context, code string) (dto.GameS
 	response.Players = []dto.PlayerStat{}
 
 	for _, p := range players {
+		// TODO: получаю assets конкретного игрока по p.ID
 		response.Players = append(response.Players, dto.PlayerStat{
 			VKID:          p.VKID,
 			Nickname:      p.Nickname,
@@ -173,6 +160,8 @@ func (s *GameService) LoadGameState(ctx context.Context, code string) (dto.GameS
 			Balance:       p.Balance,
 			ChildAmount:   p.ChildAmount,
 			BankLoan:      p.BankLoan,
+			// TODO: добавляю сформированный список []AssetStat
+			// Assets: []AssetStat,
 		})
 	}
 
@@ -284,5 +273,14 @@ func (s *GameService) EndTurn(ctx context.Context, code string, VKID int) error 
 	if err != nil {
 		return err
 	}
+	return nil
+}
+
+func (s *GameService) BuyAsset(ctx context.Context, code string, req *dto.CardActionBuyReq) error {
+	err := s.playerRepo.BuyAsset(req)
+	if err != nil {
+		return err
+	}
+
 	return nil
 }

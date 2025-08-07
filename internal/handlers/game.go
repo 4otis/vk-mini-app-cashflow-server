@@ -92,8 +92,6 @@ func (h *GameHandler) RollDice(c *gin.Context) {
 }
 
 func (h *GameHandler) EndTurn(c *gin.Context) {
-	// resp, err := h.gameService.MovePlayer(c.Request.Context(), c.Param("code"))
-
 	var req dto.EndTurnReq
 	if err := c.ShouldBindJSON(&req); err != nil {
 		// log.Printf("ERROR. BadRequest: (VKID=%d;)\n", req.VKID)
@@ -108,26 +106,19 @@ func (h *GameHandler) EndTurn(c *gin.Context) {
 	}
 }
 
-//   switch(action) {
-//     case 'Купить':
-//       endpoint = '/buy';
-//       break;
-//     case 'Продать':
-//       endpoint = '/sell';
-//       break;
-//     case 'Отказаться':
-//       endpoint = '/skip';
-//       break;
-//     case 'Оплатить':
-//       endpoint = '/pay';
-//       break;
-//     case 'Родить ребенка':
-//       endpoint = '/addchild';
-//       break;
-//   }
-
 func (h *GameHandler) CardActionBuy(c *gin.Context) {
 	log.Printf("CardActionBuy was TRIGGERED.")
+
+	var req dto.CardActionBuyReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.gameService.BuyAsset(c.Request.Context(), c.Param("code"), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
 }
 
 func (h *GameHandler) CardActionSell(c *gin.Context) {

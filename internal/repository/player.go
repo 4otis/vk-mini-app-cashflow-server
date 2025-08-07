@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"math/rand/v2"
 
+	"github.com/4otis/vk-mini-app-cashflow-server/internal/dto"
 	"github.com/4otis/vk-mini-app-cashflow-server/internal/models"
 	"gorm.io/gorm"
 )
@@ -103,6 +104,12 @@ func isPayday(pos int, value int) bool {
 	return value >= (8 - pos%8)
 }
 
+func paydayPlayer(tx *gorm.DB, player *models.Player) error {
+	newBalance := player.Balance + player.Cashflow
+
+	return tx.Model(player).Update("balance", newBalance).Error
+}
+
 func (r PlayerRepository) MovePlayer(VKID int, value int) (*models.Player, error) {
 	var resultPlayer *models.Player
 
@@ -130,8 +137,47 @@ func (r PlayerRepository) MovePlayer(VKID int, value int) (*models.Player, error
 	return resultPlayer, err
 }
 
-func paydayPlayer(tx *gorm.DB, player *models.Player) error {
-	newBalance := player.Balance + player.Cashflow
+func (r PlayerRepository) BuyAsset(req *dto.CardActionBuyReq) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		// TODO: получить asset
+		asset := &models.Asset{}
+		err := tx.Model(asset).Where("title = ? AND price = ? AND cashflow = ?",
+			req.Title, req.Price, req.Cashflow).First(asset).Error
+		if err != nil {
+			return fmt.Errorf("error while reading assetID by args: %w", err)
+		}
 
-	return tx.Model(player).Update("balance", newBalance).Error
+		// TODO: пересчитываем данные для игрока
+		player := &models.Player{}
+		err = tx.Model(player).Where("vk_id = ?", req.VKID).First(&player).Error
+		if err != nil {
+			return fmt.Errorf("error while reading player by VKID: %w", err)
+		}
+
+		if player.Balance < req.Price {
+			return fmt.Errorf("error player.Balance is not enough")
+		} else {
+			player.Balance -= req.Price
+			player.PassiveIncome += req.Cashflow
+			player.TotalIncome += req.Cashflow
+			player.Cashflow = player.TotalIncome - player.TotalExpenses
+		}
+
+		err = tx.Model(player).Where("id = ?", player.ID).Updates(player).Error
+		if err != nil {
+			return fmt.Errorf("error while updating player: %w", err)
+		}
+
+		// TODO: добавить запись в players_assets
+		err = tx.Exec(
+			"INSERT INTO players_assets (asset_id, player_id) VALUES (?, ?)",
+			asset.ID,
+			player.ID,
+		).Error
+		if err != nil {
+			return fmt.Errorf("error while inserting into players_assets: %w", err)
+		}
+
+		return nil
+	})
 }

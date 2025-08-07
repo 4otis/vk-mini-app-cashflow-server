@@ -11,4 +11,9 @@ CREATE TABLE characters (
     taxes INTEGER NOT NULL DEFAULT 0,
     child_expenses INTEGER NOT NULL DEFAULT 0,
     other_expenses INTEGER NOT NULL DEFAULT 0
+    
 );
+
+-- alter table players add constraint fk_character_id foreign key (character_id) references characters(id) on delete cascade;
+-- alter table players add constraint fk_character_id foreign key (character_id) references characters(id) on delete cascade;
+-- alter table players add constraint fk_character_id foreign key (character_id) references characters(id) on delete cascade;
