@@ -17,6 +17,6 @@ type Player struct {
 	Balance       int       `gorm:"type:integer;default:0" json:"balance"`
 	BankLoan      int       `gorm:"type:integer;default:0" json:"bank_loan"`
 	ChildAmount   int       `gorm:"type:integer;default:0" json:"child_amount"`
-	Asset         []*Asset  `gorm:"many2many:players_assets;"`
+	Asset         []*Asset  `gorm:"many2many:players_assets;OnDelete:CASCADE"`
 	Character     Character `gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE" json:"character"`
 }

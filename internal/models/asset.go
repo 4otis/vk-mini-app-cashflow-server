@@ -9,5 +9,5 @@ type Asset struct {
 	TypeID   int       `gorm:"index;not null" json:"type_id"`
 	Price    int       `gorm:"type:integer;default:0" json:"price"`
 	Cashflow int       `gorm:"type:integer;default:0" json:"cashflow"`
-	Players  []*Player `gorm:"many2many:players_assets;"`
+	Players  []*Player `gorm:"many2many:players_assets;OnDelete:CASCADE"`
 }
