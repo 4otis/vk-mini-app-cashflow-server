@@ -367,10 +367,10 @@
   </audio> -->
 
   <audio id="errorSound" class="audio-element" preload="auto">
-    <source src="https://drive.google.com/file/d/1EmwuOhGDIhDDxPZ-MnFEUKMfMomjfXTa/view?usp=sharing" type="audio/mpeg">
+    <source src="https://drive.google.com/uc?export=download&id=1EmwuOhGDIhDDxPZ-MnFEUKMfMomjfXTa" type="audio/mpeg">
   </audio>
   <audio id="successSound" class="audio-element" preload="auto">
-    <source src="https://drive.google.com/file/d/1EmwuOhGDIhDDxPZ-MnFEUKMfMomjfXTa/view?usp=sharing" type="audio/mpeg">
+    <source src="https://drive.google.com/uc?export=download&id=1EmwuOhGDIhDDxPZ-MnFEUKMfMomjfXTa" type="audio/mpeg">
   </audio>
 
   <script>
@@ -609,9 +609,32 @@
       const successSound = ref(null);
       const hasMatchingAssets = computed(() => matchingAssets.value.length > 0);
 
-      onMounted(() => {
-          errorSound.value = document.getElementById('errorSound');
-          successSound.value = document.getElementById('successSound');
+      onMounted(() => {          
+          if (isVK.value && VK.Bridge) {
+            // Загружаем звук ошибки
+            VK.Bridge.send('VKWebAppDownloadFile', {
+              url: 'https://drive.google.com/uc?export=download&id=1EmwuOhGDIhDDxPZ-MnFEUKMfMomjfXTa',
+              filename: 'error.mp3'
+            }).then(data => {
+              errorSound.value = new Audio(data.file);
+            }).catch(err => {
+              console.error("Ошибка загрузки звука ошибки:", err);
+            });
+
+            // Загружаем звук успеха
+            VK.Bridge.send('VKWebAppDownloadFile', {
+              url: 'https://drive.google.com/uc?export=download&id=1EmwuOhGDIhDDxPZ-MnFEUKMfMomjfXTa',
+              filename: 'success.mp3'
+            }).then(data => {
+              successSound.value = new Audio(data.file);
+            }).catch(err => {
+              console.error("Ошибка загрузки звука успеха:", err);
+            });
+          } else {
+            // Для браузера (если не в VK)
+            errorSound.value = document.getElementById('errorSound');
+            successSound.value = document.getElementById('successSound');
+          }
 
         if (typeof VK !== 'undefined' && VK.WebApp) {
           isVK.value = true;
@@ -659,6 +682,7 @@
       const joinGame = async () => {
         if (!joinCode.value.trim()) {
           joinError.value = 'Введите код игры';
+          showError("babah");
           return;
         }
         
