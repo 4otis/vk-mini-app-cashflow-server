@@ -56,11 +56,12 @@ func (s *SessionService) CreateSession(ctx context.Context, creatorVKID int, nic
 
 	// Create creator player
 	player := &models.Player{
-		VKID:      creatorVKID,
-		SessionID: session.ID,
-		Nickname:  nickname,
-		Ready:     false,
-		Balance:   10000, // Starting balance
+		VKID:        creatorVKID,
+		SessionID:   session.ID,
+		Nickname:    nickname,
+		CharacterID: 1,
+		Ready:       false,
+		Balance:     0, // Starting balance
 	}
 
 	if err := s.playerRepo.Create(player); err != nil {
@@ -98,11 +99,12 @@ func (s *SessionService) JoinSession(ctx context.Context, code string, vkID int,
 
 	// Create new player
 	player := &models.Player{
-		VKID:      vkID,
-		SessionID: session.ID,
-		Nickname:  nickname,
-		Ready:     false,
-		Balance:   10000, // Starting balance
+		VKID:        vkID,
+		SessionID:   session.ID,
+		Nickname:    nickname,
+		Ready:       false,
+		CharacterID: 0,
+		Balance:     0, // Starting balance
 	}
 
 	if err := s.playerRepo.Create(player); err != nil {
