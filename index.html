@@ -438,7 +438,6 @@
                       @click="handleCardAction(action)">
                 {{ action }}
               </button>
-              <button v-if="canSkipCard" @click="skipCard" class="secondary">Пропустить</button>
             </div>
           </div>
         </div>
@@ -878,7 +877,7 @@
         initGameState, allPlayersReady, startPollingState, stopPollingState,
         processGameData, startPollingReady, stopPollingReady, pollReadyInterval,
         pollStateInterval, showCardModal, cardModalClass, canSkipCard,
-        handleCardAction, skipCard, closeCardModal, gameLog, hasCurrentCard,
+        handleCardAction, closeCardModal, gameLog, hasCurrentCard,
         showCurrentCard
       };
     }
