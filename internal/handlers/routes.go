@@ -37,6 +37,10 @@ func SetupRoutes(g *gin.Engine, db *gorm.DB) {
 	g.GET("/game/:code/state", gameHandler.LoadGameState)
 	g.GET("/game/:code/initgame", gameHandler.InitGameState)
 	g.POST("/game/:code/roll", gameHandler.RollDice)
+	g.POST("/game/:code/buy", gameHandler.CardActionBuy)
+	g.POST("/game/:code/sell", gameHandler.CardActionSell)
+	g.POST("/game/:code/pay", gameHandler.CardActionPay)
+	g.POST("/game/:code/addchild", gameHandler.CardActionChild)
 	g.POST("/game/:code/endturn", gameHandler.EndTurn)
 
 	g.Use(cors.New(cors.Config{

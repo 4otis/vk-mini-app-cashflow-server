@@ -384,6 +384,7 @@
               </button>
 
               <button @click="endTurn" :disabled="!canEndTurn">⏭️ Закончить ход</button>
+              <button @click="showCurrentCard" :disabled="!hasCurrentCard">🃏 Показать карточку</button>
               <button @click="loadGameState">🔄 Обновить</button>
             </div>
             
@@ -485,6 +486,9 @@
           default: return '';
         }
       });
+
+      const currentCardData = ref(null);
+      const hasCurrentCard = computed(() => currentCardData.value !== null && !showCardModal.value);
 
       onMounted(() => {
         if (typeof VK !== 'undefined' && VK.WebApp) {
@@ -757,20 +761,18 @@
       const processGameData = async (data) => {
         console.log("Game state data:", data);
         if (data.players !== null && Array.isArray(data?.players)) {
-
           if (ourPlayerIndex.value === null) {
             ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
           }
         
           currentPlayer.value = data.players[ourPlayerIndex.value];
-          console.log(currentPlayer)
           gamePlayers.value = data.players;
           isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value;
-          console.log('turn:', isCurrentPlayer.value,'cur_turn:', data.cur_turn, 'ourPlayerInd:', ourPlayerIndex.value);
         }
         
         if (data.cur_card && data.cur_card.type && isCurrentPlayer.value) {
-          currentCard.value = {
+          // Сохраняем данные карты даже если модальное окно закрыто
+          currentCardData.value = {
             type: data.cur_card.type,
             card: null,
             actions: []
@@ -778,112 +780,93 @@
 
           switch (data.cur_card.type) {
             case 'ASSET':
-              currentCard.value.card = {
+              currentCardData.value.card = {
                 title: data.cur_card.asset.title,
                 descr: data.cur_card.asset.descr,
                 price: data.cur_card.asset.price,
                 cashflow: data.cur_card.asset.cashflow
               };
-              currentCard.value.actions = ['Купить', 'Отказаться'];
-            
+              currentCardData.value.actions = ['Купить', 'Отказаться'];
               break;
               
             case 'MARKET':
-              currentCard.value.card = {
+              currentCardData.value.card = {
                 title: data.cur_card.market.title,
                 descr: data.cur_card.market.descr,
                 sell_cost: data.cur_card.market.sell_cost
               };
-              currentCard.value.actions = ['Продать', 'Отказаться'];
-            
+              currentCardData.value.actions = ['Продать', 'Отказаться'];
               break;
               
             case 'ISSUE':
-              currentCard.value.card = {
+              currentCardData.value.card = {
                 title: data.cur_card.issue.title,
                 descr: data.cur_card.issue.descr,
                 price: data.cur_card.issue.price
               };
-              currentCard.value.actions = ['Оплатить'];
-            
+              currentCardData.value.actions = ['Оплатить'];
               break;
           }
-
-          showCardModal.value = true;
-          console.log(currentCard.value)
-          console.log(currentCard.value.type)
-          console.log(currentCard.value.card)
-          console.log(currentCard.value.card.title)
+          
+          currentCard.value = currentCardData.value;
           canSkipCard.value = data.cur_card.type !== 'ISSUE';
         } else {
+          currentCardData.value = null;
           currentCard.value = null;
-          showCardModal.value = false;
         }
 
         gameLog.value = data.log || [];
       };
       
-
+      const showCurrentCard = () => {
+        if (currentCardData.value) {
+          currentCard.value = currentCardData.value;
+          showCardModal.value = true;
+        }
+      };
+      
       const handleCardAction = async (action) => {
         try {
-          let endpoint = '';
-          let body = { vk_id: user.value.id };
-          
-          switch(action) {
-            case 'Купить':
-              endpoint = '/buy';
-              break;
-            case 'Продать':
-              endpoint = '/sell';
-              break;
-            case 'Отказаться':
-              endpoint = '/skip';
-              break;
-            case 'Оплатить':
-              endpoint = '/pay';
-              break;
-            case 'Родить ребенка':
-              endpoint = '/addchild';
-              break;
+          if (action === 'Отказаться') {
+            currentCardData.value = null;
+            showCardModal.value = false;
+          } else {            
+            let endpoint = '';
+            let body = { vk_id: user.value.id };
+            
+            switch(action) {
+              case 'Купить':
+                endpoint = '/buy';
+                break;
+              case 'Продать':
+                endpoint = '/sell';
+                break;
+              case 'Оплатить':
+                endpoint = '/pay';
+                break;
+              case 'Родить ребенка':
+                endpoint = '/addchild';
+                break;
+            }
+            
+            const response = await fetch(`/game/${sessionCode.value}${endpoint}`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(body)
+            });
+            
+            if (!response.ok) throw new Error('Ошибка сервера');
+            
+            currentCardData.value = null;
+            await loadGameState();
+            showCardModal.value = false;
           }
-          
-          const response = await fetch(`/game/${sessionCode.value}${endpoint}`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(body)
-          });
-          
-          if (!response.ok) throw new Error('Ошибка сервера');
-          
-          // Обновляем состояние игры
-          await loadGameState();
-          showCardModal.value = false;
         } catch (err) {
           errorMessage.value = 'Ошибка при обработке действия: ' + err.message;
         }
       };
       
-      const skipCard = async () => {
-        try {
-          const response = await fetch(`/game/${sessionCode.value}/skip`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ vk_id: user.value.id })
-          });
-          
-          if (!response.ok) throw new Error('Ошибка сервера');
-          
-          await loadGameState();
-          showCardModal.value = false;
-        } catch (err) {
-          errorMessage.value = 'Ошибка при пропуске карточки: ' + err.message;
-        }
-      };
-      
       const closeCardModal = () => {
-        if (canSkipCard.value) {
-          skipCard();
-        }
         showCardModal.value = false;
       };
       
@@ -895,7 +878,8 @@
         initGameState, allPlayersReady, startPollingState, stopPollingState,
         processGameData, startPollingReady, stopPollingReady, pollReadyInterval,
         pollStateInterval, showCardModal, cardModalClass, canSkipCard,
-        handleCardAction, skipCard, closeCardModal, gameLog
+        handleCardAction, skipCard, closeCardModal, gameLog, hasCurrentCard,
+        showCurrentCard
       };
     }
   }).mount('#app');

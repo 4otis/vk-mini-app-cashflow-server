@@ -107,3 +107,37 @@ func (h *GameHandler) EndTurn(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
 }
+
+//   switch(action) {
+//     case 'Купить':
+//       endpoint = '/buy';
+//       break;
+//     case 'Продать':
+//       endpoint = '/sell';
+//       break;
+//     case 'Отказаться':
+//       endpoint = '/skip';
+//       break;
+//     case 'Оплатить':
+//       endpoint = '/pay';
+//       break;
+//     case 'Родить ребенка':
+//       endpoint = '/addchild';
+//       break;
+//   }
+
+func (h *GameHandler) CardActionBuy(c *gin.Context) {
+	log.Printf("CardActionBuy was TRIGGERED.")
+}
+
+func (h *GameHandler) CardActionSell(c *gin.Context) {
+	log.Printf("CardActionSell was TRIGGERED.")
+}
+
+func (h *GameHandler) CardActionPay(c *gin.Context) {
+	log.Printf("CardActionPay was TRIGGERED.")
+}
+
+func (h *GameHandler) CardActionChild(c *gin.Context) {
+	log.Printf("CardActionChild was TRIGGERED.")
+}
