@@ -31,7 +31,7 @@ create table players_assets (
     asset_id integer not null,
     player_id integer not null,
     primary key (asset_id, player_id),
-    constraint fk_asset foreign key (asset_id) references assets(id) on delete cascade
+    constraint fk_asset foreign key (asset_id) references assets(id) on delete cascade,
     constraint fk_player foreign key (player_id) references players(id) on delete cascade
 );
 
