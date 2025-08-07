@@ -367,7 +367,7 @@
   vkBridge.send("VKWebAppInit", {});
   </script>
 
-  <div id="app">
+  <div id="app" :class="{'red-flash': isRedFlash, 'shake': isShaking}">
     <div class="container">
       <h1>Cashflow Game</h1>
       
@@ -997,13 +997,12 @@
         }
       };
       
-      // Модифицированный handleCardAction с проверками
       const handleCardAction = async (action) => {
         try {
           if (action === 'Отказаться') {
             currentCardData.value = null;
             showCardModal.value = false;
-            showError("проверка тряски");
+            showError("Вы отказались от предложения");
             return;
           }
           
@@ -1050,7 +1049,7 @@
           showError('Ошибка при обработке действия: ' + err.message);
         }
       };
-
+      
       const closeCardModal = () => {
         showCardModal.value = false;
       };
