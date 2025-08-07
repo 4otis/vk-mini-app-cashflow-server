@@ -43,3 +43,21 @@ type Card struct {
 	Market MarketCard `json:"market,omitempty"`
 	Issue  IssueCard  `json:"issue,omitempty"`
 }
+
+type CardActionBuyReq struct {
+	VKID     int    `json:"vk_id"`
+	Title    string `json:"title"`
+	Price    int    `json:"price"`
+	Cashflow int    `json:"cashflow"`
+}
+
+type CardActionSellReq struct {
+	VKID     int    `json:"vk_id"`
+	Title    string `json:"title"`
+	SellCost int    `json:"sell_cost"`
+}
+
+type CardActionPayReq struct {
+	VKID  int `json:"vk_id"`
+	Price int `json:"price"`
+}
