@@ -409,18 +409,18 @@
             <h3>Ваш статус</h3>
             <div :class="['player-card', isCurrentPlayer ? 'current-player' : '']">
               <h4>{{ currentPlayer.nickname }}</h4>
-              <p>Баланс: {{ currentPlayer.balance }} тыс. ₽</p>
-              <p>Пассивный доход: {{ currentPlayer.passive_income }} тыс. ₽</p>
+              <p>Баланс: {{ currentPlayer.balance }} ₽</p>
+              <p>Пассивный доход: {{ currentPlayer.passive_income }} ₽</p>
             </div>
             
             <div class="player-stats">
               <div class="stat-item">
                 <strong>Доход</strong>
-                <p>{{ currentPlayer.total_income }} тыс. ₽</p>
+                <p>{{ currentPlayer.total_income }} ₽</p>
               </div>
               <div class="stat-item">
                 <strong>Расходы</strong>
-                <p>{{ currentPlayer.total_expenses }} тыс. ₽</p>
+                <p>{{ currentPlayer.total_expenses }} ₽</p>
               </div>
               <div class="stat-item">
                 <strong>Дети</strong>
@@ -428,7 +428,7 @@
               </div>
               <div class="stat-item">
                 <strong>Кредиты</strong>
-                <p>{{ currentPlayer.bank_loan }} тыс. ₽</p>
+                <p>{{ currentPlayer.bank_loan }} ₽</p>
               </div>
             </div>
             
@@ -436,7 +436,7 @@
               <h4>Активы</h4>
               <div v-for="asset in currentPlayer.assets" :key="asset.id" class="asset-item">
                 <span>{{ asset.title }}</span>
-                <span>+{{ asset.cashflow }} тыс. ₽</span>
+                <span>+{{ asset.cashflow }} ₽</span>
               </div>
             </div>
           </div>
@@ -463,8 +463,8 @@
           <div class="players-grid">
             <div v-for="player in gamePlayers" :key="player.id" class="player-card">
               <h4>{{ player.nickname }}</h4>
-              <p>Баланс: {{ player.balance }} тыс. ₽</p>
-              <p>Пассивный доход: {{ player.passive_income }} тыс. ₽</p>
+              <p>Баланс: {{ player.balance }} ₽</p>
+              <p>Пассивный доход: {{ player.passive_income }} ₽</p>
               <p v-if="player.isBankrupt" style="color: red;">БАНКРОТ</p>
             </div>
           </div>
@@ -485,15 +485,15 @@
             <p class="card-description">{{ currentCard.card.descr }}</p>
             
             <div v-if="currentCard.type === 'ASSET'">
-              <p class="card-cost">Стоимость: {{ currentCard.card.price }} тыс. ₽</p>
-              <p>Пассивный доход: +{{ currentCard.card.cashflow }} тыс. ₽</p>
+              <p class="card-cost">Стоимость: {{ currentCard.card.price }} ₽</p>
+              <p>Пассивный доход: +{{ currentCard.card.cashflow }} ₽</p>
               <p v-if="currentPlayer.balance < currentCard.card.price" style="color: red;">
                 Недостаточно средств!
               </p>
             </div>
             
             <div v-if="currentCard.type === 'MARKET'">
-              <p>Рыночная цена: {{ currentCard.card.sell_cost }} тыс. ₽</p>
+              <p>Рыночная цена: {{ currentCard.card.sell_cost }} ₽</p>
               <div v-if="matchingAssets.length > 0" class="asset-selection">
                 <h4>Выберите актив для продажи:</h4>
                 <div v-for="asset in matchingAssets" :key="asset.id" class="asset-option">
@@ -503,7 +503,7 @@
                          v-model="selectedAssets">
                   <label :for="'asset-' + asset.id" class="asset-details">
                     <div>{{ asset.title }}</div>
-                    <div>Доход: +{{ asset.cashflow }} тыс. ₽</div>
+                    <div>Доход: +{{ asset.cashflow }} ₽</div>
                   </label>
                 </div>
               </div>
@@ -513,7 +513,7 @@
             </div>
             
             <div v-if="currentCard.type === 'ISSUE'">
-              <p class="card-cost">Стоимость: {{ currentCard.card.price }} тыс. ₽</p>
+              <p class="card-cost">Стоимость: {{ currentCard.card.price }} ₽</p>
               <p v-if="currentPlayer.balance < currentCard.card.price" style="color: red;">
                 Недостаточно средств! Вам нужно взять кредит или продать активы.
               </p>
