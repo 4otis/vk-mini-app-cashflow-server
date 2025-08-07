@@ -1032,6 +1032,9 @@
           switch(action) {
             case 'Купить':
               endpoint = '/buy';
+              body.value = { title: currentCard.card.title,
+                             price: currentCard.card.price,
+                             cashflow: currentCard.card.cashflow }
               break;
             case 'Оплатить':
               endpoint = '/pay';
