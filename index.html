@@ -296,9 +296,73 @@
     .dice-rolling {
       animation: diceRoll 0.5s ease-in-out;
     }
+
+    .shake {
+      animation: shake 0.5s;
+    }
+    
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+      20%, 40%, 60%, 80% { transform: translateX(5px); }
+    }
+    
+    .red-flash {
+      animation: redFlash 1s;
+    }
+    
+    @keyframes redFlash {
+      0%, 100% { background-color: transparent; }
+      50% { background-color: rgba(255, 0, 0, 0.2); }
+    }
+    
+    .asset-selection {
+      max-height: 200px;
+      overflow-y: auto;
+      margin: 10px 0;
+    }
+    
+    .asset-option {
+      display: flex;
+      align-items: center;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+    }
+    
+    .asset-option input {
+      width: auto;
+      margin-right: 10px;
+    }
+    
+    .asset-details {
+      flex-grow: 1;
+    }
+    
+    .sell-modal-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    
+    .sell-modal-actions button {
+      flex: 1;
+    }
+    
+    /* Аудио элемент (скрытый) */
+    .audio-element {
+      display: none;
+    }
   </style>
 </head>
 <body>
+
+  <audio id="errorSound" class="audio-element" preload="auto">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" type="audio/mpeg">
+  </audio>
+  <audio id="successSound" class="audio-element" preload="auto">
+    <source src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3" type="audio/mpeg">
+  </audio>
+
   <script>
   vkBridge.send("VKWebAppInit", {});
   </script>
@@ -385,7 +449,7 @@
 
               <button @click="endTurn" :disabled="!canEndTurn">⏭️ Закончить ход</button>
               <button @click="showCurrentCard" :disabled="!hasCurrentCard">🃏 Показать карточку</button>
-              <button @click="loadGameState">🔄 Обновить</button>
+              <button @click="loadGameState :disabled="hasCurrentCard">🔄 Обновить</button>
             </div>
             
             <div v-if="diceRolled" class="dice-result">
@@ -413,6 +477,7 @@
           </div>
         </div>
 
+
         <div v-if="showCardModal" class="modal-overlay">
           <div class="modal-content" :class="cardModalClass">
             <button class="modal-close" @click="closeCardModal">&times;</button>
@@ -422,31 +487,69 @@
             <div v-if="currentCard.type === 'ASSET'">
               <p class="card-cost">Стоимость: {{ currentCard.card.price }} тыс. ₽</p>
               <p>Пассивный доход: +{{ currentCard.card.cashflow }} тыс. ₽</p>
+              <p v-if="currentPlayer.balance < currentCard.card.price" style="color: red;">
+                Недостаточно средств!
+              </p>
             </div>
             
             <div v-if="currentCard.type === 'MARKET'">
               <p>Рыночная цена: {{ currentCard.card.sell_cost }} тыс. ₽</p>
+              <div v-if="matchingAssets.length > 0" class="asset-selection">
+                <h4>Выберите актив для продажи:</h4>
+                <div v-for="asset in matchingAssets" :key="asset.id" class="asset-option">
+                  <input type="checkbox" 
+                         :id="'asset-' + asset.id" 
+                         :value="asset.id" 
+                         v-model="selectedAssets">
+                  <label :for="'asset-' + asset.id" class="asset-details">
+                    <div>{{ asset.title }}</div>
+                    <div>Доход: +{{ asset.cashflow }} тыс. ₽</div>
+                  </label>
+                </div>
+              </div>
+              <p v-else style="color: red;">
+                У вас нет подходящих активов для продажи
+              </p>
             </div>
             
             <div v-if="currentCard.type === 'ISSUE'">
               <p class="card-cost">Стоимость: {{ currentCard.card.price }} тыс. ₽</p>
+              <p v-if="currentPlayer.balance < currentCard.card.price" style="color: red;">
+                Недостаточно средств! Вам нужно взять кредит или продать активы.
+              </p>
             </div>
             
             <div class="card-actions">
-              <button v-for="action in currentCard.actions" 
-                      :key="action" 
-                      @click="handleCardAction(action)">
-                {{ action }}
-              </button>
+              <template v-if="currentCard.type === 'MARKET' && matchingAssets.length > 0">
+                <div class="sell-modal-actions">
+                  <button @click="sellSelectedAssets" :disabled="selectedAssets.length === 0">
+                    Продать выбранное
+                  </button>
+                  <button @click="closeCardModal" class="secondary">
+                    Отмена
+                  </button>
+                </div>
+              </template>
+              <template v-else>
+                <button v-for="action in currentCard.actions" 
+                        :key="action" 
+                        @click="handleCardAction(action)"
+                        :disabled="(action === 'Купить' && currentPlayer.balance < currentCard.card.price) ||
+                                  (action === 'Оплатить' && currentPlayer.balance < currentCard.card.price)">
+                  {{ action }}
+                </button>
+              </template>
             </div>
           </div>
         </div>
+
+
       </div>
     </div>
   </div>
 
   <script>
-  const { createApp, ref, onMounted, computed } = Vue;
+  const { createApp, ref, onMounted, computed, watch } = Vue;
   
   createApp({
     setup() {
@@ -488,8 +591,18 @@
 
       const currentCardData = ref(null);
       const hasCurrentCard = computed(() => currentCardData.value !== null && !showCardModal.value);
+      const isRedFlash = ref(false);
+      const isShaking = ref(false);
+      const matchingAssets = ref([]);
+      const selectedAssets = ref([]);
+      const errorSound = ref(null);
+      const successSound = ref(null);
+      const hasMatchingAssets = computed(() => matchingAssets.value.length > 0);
 
       onMounted(() => {
+        errorSound.value = document.getElementById('errorSound');
+        successSound.value = document.getElementById('successSound');
+
         if (typeof VK !== 'undefined' && VK.WebApp) {
           isVK.value = true;
           VK.WebApp.init()
@@ -770,7 +883,6 @@
         }
         
         if (data.cur_card && data.cur_card.type && isCurrentPlayer.value) {
-          // Сохраняем данные карты даже если модальное окно закрыто
           currentCardData.value = {
             type: data.cur_card.type,
             card: null,
@@ -795,6 +907,11 @@
                 sell_cost: data.cur_card.market.sell_cost
               };
               currentCardData.value.actions = ['Продать', 'Отказаться'];
+
+              matchingAssets.value = currentPlayer.value.assets.filter(
+                asset => asset.title === data.cur_card.market.title
+              );
+              selectedAssets.value = [];
               break;
               
             case 'ISSUE':
@@ -812,6 +929,8 @@
         } else {
           currentCardData.value = null;
           currentCard.value = null;
+          matchingAssets.value = [];
+          selectedAssets.value = [];
         }
 
         gameLog.value = data.log || [];
@@ -824,51 +943,119 @@
         }
       };
       
+      // Метод для продажи выбранных активов
+      const sellSelectedAssets = async () => {
+        if (selectedAssets.value.length === 0) {
+          showError("Выберите хотя бы один актив для продажи");
+          return;
+        }
+        
+        try {
+          const response = await fetch(`/game/${sessionCode.value}/sell`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              vk_id: user.value.id,
+              asset_ids: selectedAssets.value
+            })
+          });
+          
+          if (!response.ok) throw new Error('Ошибка сервера');
+          
+          playSuccessSound();
+          currentCardData.value = null;
+          await loadGameState();
+          showCardModal.value = false;
+        } catch (err) {
+          showError(err.message);
+        }
+      };
+      
+      // Метод для показа ошибки с анимацией
+      const showError = (message) => {
+        errorMessage.value = message;
+        isRedFlash.value = true;
+        isShaking.value = true;
+        
+        // Воспроизводим звук ошибки
+        if (errorSound.value) {
+          errorSound.value.currentTime = 0;
+          errorSound.value.play().catch(e => console.log("Audio play error:", e));
+        }
+        
+        setTimeout(() => {
+          isRedFlash.value = false;
+          isShaking.value = false;
+        }, 1000);
+      };
+      
+      // Метод для воспроизведения звука успеха
+      const playSuccessSound = () => {
+        if (successSound.value) {
+          successSound.value.currentTime = 0;
+          successSound.value.play().catch(e => console.log("Audio play error:", e));
+        }
+      };
+      
+      // Модифицированный handleCardAction с проверками
       const handleCardAction = async (action) => {
         try {
           if (action === 'Отказаться') {
             currentCardData.value = null;
             showCardModal.value = false;
-          } else {            
-            let endpoint = '';
-            let body = { vk_id: user.value.id };
-            
-            switch(action) {
-              case 'Купить':
-                endpoint = '/buy';
-                break;
-              case 'Продать':
-                endpoint = '/sell';
-                break;
-              case 'Оплатить':
-                endpoint = '/pay';
-                break;
-              case 'Родить ребенка':
-                endpoint = '/addchild';
-                break;
-            }
-            
-            const response = await fetch(`/game/${sessionCode.value}${endpoint}`, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify(body)
-            });
-            
-            if (!response.ok) throw new Error('Ошибка сервера');
-            
-            currentCardData.value = null;
-            await loadGameState();
-            showCardModal.value = false;
+            return;
           }
+          
+          // Проверка на возможность покупки
+          if (action === 'Купить' && currentPlayer.value.balance < currentCard.value.card.price) {
+            showError("Недостаточно средств для покупки!");
+            return;
+          }
+          
+          // Проверка на возможность оплаты
+          if (action === 'Оплатить' && currentPlayer.value.balance < currentCard.value.card.price) {
+            showError("Недостаточно средств для оплаты!");
+            return;
+          }
+          
+          let endpoint = '';
+          let body = { vk_id: user.value.id };
+          
+          switch(action) {
+            case 'Купить':
+              endpoint = '/buy';
+              break;
+            case 'Оплатить':
+              endpoint = '/pay';
+              break;
+            case 'Родить ребенка':
+              endpoint = '/addchild';
+              break;
+          }
+          
+          const response = await fetch(`/game/${sessionCode.value}${endpoint}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+          });
+          
+          if (!response.ok) throw new Error('Ошибка сервера');
+          
+          playSuccessSound();
+          currentCardData.value = null;
+          await loadGameState();
+          showCardModal.value = false;
         } catch (err) {
-          errorMessage.value = 'Ошибка при обработке действия: ' + err.message;
+          showError('Ошибка при обработке действия: ' + err.message);
         }
       };
-      
+
       const closeCardModal = () => {
         showCardModal.value = false;
       };
       
+
+
       return { 
         sessionCode, players, startNewGame, joinGame, getPlayers, playerReady,
         isLoading, errorMessage, showJoinForm, joinCode, joinError,gameStarted,
@@ -877,8 +1064,9 @@
         initGameState, allPlayersReady, startPollingState, stopPollingState,
         processGameData, startPollingReady, stopPollingReady, pollReadyInterval,
         pollStateInterval, showCardModal, cardModalClass, canSkipCard,
-        handleCardAction, closeCardModal, gameLog, hasCurrentCard,
-        showCurrentCard
+        handleCardAction, closeCardModal, gameLog, hasCurrentCard, showCurrentCard,
+        isRedFlash, isShaking, matchingAssets, selectedAssets, hasMatchingAssets,
+        sellSelectedAssets, showError, playSuccessSound
       };
     }
   }).mount('#app');
