@@ -356,12 +356,24 @@
 </head>
 <body>
 
+  <!-- Аудио элемент для звука ошибки -->
   <audio id="errorSound" class="audio-element" preload="auto">
-    <source src="https://assets.mixkit.co/sfx/preview/mixkit-alarm-digital-clock-beep-989.mp3" type="audio/mpeg">
+    <source src="audio/error.mp3" type="audio/mpeg">
+    Ваш браузер не поддерживает аудио элемент.
+  </audio>
+
+  <!-- Аудио элемент для звука успеха -->
+  <audio id="successSound" class="audio-element" preload="auto">
+    <source src="audio/success.mp3" type="audio/mpeg">
+    Ваш браузер не поддерживает аудио элемент.
+  </audio>
+
+  <!-- <audio id="errorSound" class="audio-element" preload="auto">
+    <source src="https://www.myinstants.com/en/instant/error/?utm_source=copy&utm_medium=share" type="audio/mpeg">
   </audio>
   <audio id="successSound" class="audio-element" preload="auto">
-    <source src="https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3" type="audio/mpeg">
-  </audio>
+    <source src="https://www.myinstants.com/en/instant/flashbanggg-31460/?utm_source=copy&utm_medium=share" type="audio/mpeg">
+  </audio> -->
 
   <script>
   vkBridge.send("VKWebAppInit", {});
@@ -600,8 +612,8 @@
       const hasMatchingAssets = computed(() => matchingAssets.value.length > 0);
 
       onMounted(() => {
-        errorSound.value = document.getElementById('errorSound');
-        successSound.value = document.getElementById('successSound');
+          errorSound.value = document.getElementById('errorSound');
+          successSound.value = document.getElementById('successSound');
 
         if (typeof VK !== 'undefined' && VK.WebApp) {
           isVK.value = true;
@@ -622,6 +634,7 @@
         errorMessage.value = '';
         
         try {
+          showError("startNewGame");
           user.value = await vkBridge.send('VKWebAppGetUserInfo');
           console.log('VK ID:', user.value.id);
 
