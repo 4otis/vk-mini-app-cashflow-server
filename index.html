@@ -390,6 +390,8 @@
   <!-- Audio elements -->
   <audio id="successSound" src="/audio/success.mp3" preload="auto"></audio>
   <audio id="errorSound" src="/audio/error.mp3" preload="auto"></audio>
+  <audio id="sellAssetSound" src="/audio/sell-assets.mp3" preload="auto"></audio>
+  <audio id="paydaySound" src="/audio/payday.mp3" preload="auto"></audio>
 
   <script>
   vkBridge.send("VKWebAppInit", {});
@@ -467,6 +469,7 @@
               <h4>Активы</h4>
               <div v-for="asset in currentPlayer.assets" :key="asset.id" class="asset-item">
                 <span>{{ asset.title }}</span>
+                <span> был куплен за: {{ asset.price }} ₽</span>
                 <span>+{{ asset.cashflow }} ₽</span>
               </div>
             </div>
@@ -633,12 +636,16 @@
       const matchingAssets = ref([]);
       const selectedAssets = ref([]);
       const errorSound = ref(null);
+      const paydaySound = ref(null);
+      const sellAssetSound = ref(null);
       const successSound = ref(null);
       const hasMatchingAssets = computed(() => matchingAssets.value.length > 0);
 
       onMounted(() => {    
         errorSound.value = document.getElementById('errorSound');
         successSound.value = document.getElementById('successSound');
+        paydaySound.value = document.getElementById('paydaySound');
+        sellAssetSound.value = document.getElementById('sellAssetSound');
 
         
 
@@ -998,6 +1005,8 @@
           }));
 
 
+          console.log("assetsToSell: ", assetsToSell.value)
+
 
           const response = await fetch(`/game/${sessionCode.value}/sell`, {
             method: 'POST',
@@ -1013,8 +1022,8 @@
           
           playSellAssetSound();
           currentCardData.value = null;
-          await loadGameState();
           showCardModal.value = false;
+          await loadGameState();
         } catch (err) {
           showError(err.message);
         }
@@ -1046,13 +1055,26 @@
           successSound.value.play().catch(e => console.log("Audio play error:", e));
         }
       };
+
+      const playSellAssetSound= () => {
+        if (sellAssetSound.value) {
+          sellAssetSound.value.currentTime = 0;
+          sellAssetSound.value.play().catch(e => console.log("Audio play error:", e));
+        }
+      };
+
+      const playPaydaySound = () => {
+        if (paydaySound.value) {
+          paydaySound.value.currentTime = 0;
+          paydaySound.value.play().catch(e => console.log("Audio play error:", e));
+        }
+      };
       
       const handleCardAction = async (action) => {
         try {
           if (action === 'Отказаться') {
             currentCardData.value = null;
             showCardModal.value = false;
-            showError("Вы отказались от предложения");
             return;
           }
           
@@ -1104,8 +1126,8 @@
           
           playSuccessSound();
           currentCardData.value = null;
-          await loadGameState();
           showCardModal.value = false;
+          await loadGameState();
         } catch (err) {
           showError('Ошибка при обработке действия: ' + err.message);
         }
@@ -1127,7 +1149,8 @@
         pollStateInterval, showCardModal, cardModalClass, canSkipCard,
         handleCardAction, closeCardModal, gameLog, hasCurrentCard, showCurrentCard,
         isRedFlash, isShaking, matchingAssets, selectedAssets, hasMatchingAssets,
-        sellSelectedAssets, showError, playSuccessSound
+        sellSelectedAssets, showError, playSuccessSound, paydaySound,
+        sellAssetSound, playSellAssetSound, playPaydaySound
       };
     }
   }).mount('#app');
