@@ -19,4 +19,5 @@ type Player struct {
 	ChildAmount   int    `gorm:"type:integer;default:0" json:"child_amount"`
 	// Asset         []*Asset  `gorm:"many2many:players_assets;OnDelete:CASCADE"`
 	Character Character `gorm:"foreignKey:CharacterID;constraint:OnDelete:CASCADE" json:"character"`
+	IsPayday  bool
 }

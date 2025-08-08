@@ -183,15 +183,13 @@ func (s *GameService) LoadGameState(ctx context.Context, code string) (dto.GameS
 }
 
 func chooseCardType() string {
-	switch repository.RandRange(0, 2) {
-	case 0:
+	num := repository.RandRange(0, 100)
+	if num < 50 {
 		return "ASSET"
-	case 1:
+	} else if num >= 50 || num < 80 {
 		return "MARKET"
-	case 2:
+	} else if num >= 80 || num < 100 {
 		return "ISSUE"
-	case 3:
-		return "CHILD"
 	}
 
 	return ""
@@ -204,6 +202,8 @@ func (s *GameService) RollDice(ctx context.Context, code string, VKID int, value
 	if err != nil {
 		return resp, err
 	}
+
+	resp.IsPayday = player.IsPayday
 
 	resp.Player = dto.PlayerStat{
 		VKID:          player.VKID,

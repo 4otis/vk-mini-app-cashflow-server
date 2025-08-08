@@ -943,6 +943,11 @@
             actions: []
           };
 
+          currentPlayer.value = data.player
+          if (data.is_payday) {
+            playPaydaySound();
+          }
+
           switch (data.cur_card.type) {
             case 'ASSET':
               currentCardData.value.card = {

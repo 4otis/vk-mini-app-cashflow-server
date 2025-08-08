@@ -31,6 +31,7 @@ type RollDiceReq struct {
 type RollDiceResponse struct {
 	Player      PlayerStat `json:"player"`
 	CurrentCard Card       `json:"cur_card"`
+	IsPayday    bool       `json:"is_payday"`
 }
 
 type EndTurnReq struct {

@@ -112,6 +112,7 @@ func paydayPlayer(tx *gorm.DB, player *models.Player) error {
 
 func (r PlayerRepository) MovePlayer(VKID int, value int) (*models.Player, error) {
 	var resultPlayer *models.Player
+	isPaydayFlag := false
 
 	err := r.db.Transaction(func(tx *gorm.DB) error {
 		player := &models.Player{}
@@ -123,6 +124,7 @@ func (r PlayerRepository) MovePlayer(VKID int, value int) (*models.Player, error
 			if err := paydayPlayer(tx, player); err != nil {
 				return fmt.Errorf("payday failed: %w", err)
 			}
+			isPaydayFlag = true
 		}
 
 		newPosition := (player.Position + value) % 24
@@ -131,6 +133,7 @@ func (r PlayerRepository) MovePlayer(VKID int, value int) (*models.Player, error
 		}
 
 		resultPlayer = player
+		resultPlayer.IsPayday = isPaydayFlag
 		return nil
 	})
 
