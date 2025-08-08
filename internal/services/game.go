@@ -213,6 +213,8 @@ func (s *GameService) RollDice(ctx context.Context, code string, VKID int, value
 		TotalExpenses: player.TotalExpenses,
 		Cashflow:      player.Cashflow,
 		Position:      player.Position,
+		Balance:       player.Balance,
+		BankLoan:      player.BankLoan,
 	}
 
 	CardType := chooseCardType()
