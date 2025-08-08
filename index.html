@@ -1006,6 +1006,8 @@
 
 
           console.log("assetsToSell: ", assetsToSell.value)
+          console.log("assetsToSell: ", currentPlayer.value.assets)
+          console.log("assetsToSell: ", assetsToSell)
 
 
           const response = await fetch(`/game/${sessionCode.value}/sell`, {
