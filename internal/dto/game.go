@@ -52,9 +52,9 @@ type CardActionBuyReq struct {
 }
 
 type CardActionSellReq struct {
-	VKID     int    `json:"vk_id"`
-	Title    string `json:"title"`
-	SellCost int    `json:"sell_cost"`
+	VKID     int         `json:"vk_id"`
+	Assets   []AssetStat `json:"assets"`
+	SellCost int         `json:"sell_cost"`
 }
 
 type CardActionPayReq struct {

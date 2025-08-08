@@ -123,6 +123,17 @@ func (h *GameHandler) CardActionBuy(c *gin.Context) {
 
 func (h *GameHandler) CardActionSell(c *gin.Context) {
 	log.Printf("CardActionSell was TRIGGERED.")
+
+	var req dto.CardActionSellReq
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.gameService.SellAsset(c.Request.Context(), c.Param("code"), &req)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+	}
 }
 
 func (h *GameHandler) CardActionPay(c *gin.Context) {

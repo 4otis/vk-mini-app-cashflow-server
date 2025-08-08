@@ -297,23 +297,41 @@
       animation: diceRoll 0.5s ease-in-out;
     }
 
-    .shake {
-      animation: shake 0.5s;
-    }
-    
+    /* Интенсивное двумерное дрожание */
     @keyframes shake {
-      0%, 100% { transform: translateX(0); }
-      10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-      20%, 40%, 60%, 80% { transform: translateX(5px); }
+        0% { transform: translate3d(0, 0, 0); }
+        10% { transform: translate3d(-16px, -8px, 0); }
+        20% { transform: translate3d(12px, 10px, 0); }
+        30% { transform: translate3d(-14px, -6px, 0); }
+        40% { transform: translate3d(10px, 8px, 0); }
+        50% { transform: translate3d(-12px, -10px, 0); }
+        60% { transform: translate3d(14px, 6px, 0); }
+        70% { transform: translate3d(-10px, 8px, 0); }
+        80% { transform: translate3d(8px, -6px, 0); }
+        90% { transform: translate3d(-6px, 4px, 0); }
+        100% { transform: translate3d(0, 0, 0); }
     }
     
-    .red-flash {
-      animation: redFlash 1s;
+    /* Плавное мигание с быстрым нарастанием */
+    @keyframes flash {
+        0% { background-color: #f0f0f0; }
+        20% { background-color: #ffaaaa; }
+        30% { background-color: #ff7777; }
+        40% { background-color: #ff7777; }
+        50% { background-color: #ff7777; }
+        60% { background-color: #ff7777; }
+        70% { background-color: #ff7777; }
+        75% { background-color: #ffaaaa; }
+        80% { background-color: #ffdddd; }
+        100% { background-color: #f0f0f0; }
     }
     
-    @keyframes redFlash {
-      0%, 100% { background-color: transparent; }
-      50% { background-color: rgba(255, 0, 0, 0.2); }
+    .shake {
+        animation: shake 0.2s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+    }
+    
+    .flash {
+        animation: flash 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
     
     .asset-selection {
@@ -336,6 +354,18 @@
     
     .asset-details {
       flex-grow: 1;
+    }
+
+    .sell-summary {
+      margin-top: 10px;
+      padding: 8px;
+      background: #f0f8ff;
+      border-radius: 4px;
+      font-size: 0.9rem;
+    }
+
+    .sell-summary p {
+      margin: 4px 0;
     }
     
     .sell-modal-actions {
@@ -365,7 +395,7 @@
   vkBridge.send("VKWebAppInit", {});
   </script>
 
-  <div id="app" :class="{'red-flash': isRedFlash, 'shake': isShaking}">
+  <div id="app" :class="{'flash': isRedFlash, 'shake': isShaking}">
     <div class="container">
       <h1>Cashflow Game</h1>
 
@@ -504,8 +534,14 @@
                          v-model="selectedAssets">
                   <label :for="'asset-' + asset.id" class="asset-details">
                     <div>{{ asset.title }}</div>
+                    <div>Куплен за: {{ asset.price }} ₽</div>
                     <div>Доход: +{{ asset.cashflow }} ₽</div>
                   </label>
+                </div>
+
+                <div v-if="selectedAssets.length > 0" class="sell-summary">
+                  <p>Будет продано: {{ selectedAssets.length }} шт.</p>
+                  <p>Общая выручка: {{ selectedAssets.length * currentCard.card.sell_cost }} ₽</p>
                 </div>
               </div>
               <p v-else style="color: red;">
@@ -874,7 +910,6 @@
       };
 
       const processGameData = async (data) => {
-        console.log("Game state data:", data);
         if (data.players !== null && Array.isArray(data?.players)) {
           if (ourPlayerIndex.value === null) {
             ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
@@ -954,18 +989,29 @@
         }
         
         try {
+          const assetsToSell = currentPlayer.value.assets
+          .filter(asset => selectedAssets.value.includes(asset.id))
+          .map(asset => ({
+            title: asset.title,
+            price: asset.price,
+            cashflow: asset.cashflow
+          }));
+
+
+
           const response = await fetch(`/game/${sessionCode.value}/sell`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ 
               vk_id: user.value.id,
-              asset_ids: selectedAssets.value
+              assets: assetsToSell,
+              sell_cost: currentCard.value.card.sell_cost
             })
           });
           
           if (!response.ok) throw new Error('Ошибка сервера');
           
-          playSuccessSound();
+          playSellAssetSound();
           currentCardData.value = null;
           await loadGameState();
           showCardModal.value = false;
@@ -1037,6 +1083,11 @@
               break;
             case 'Оплатить':
               endpoint = '/pay';
+              body = { 
+                ...body,
+                title: currentCard.value.card.title,
+                sell_cost: currentCard.value.card.sell_cost
+              };
               break;
             case 'Родить ребенка':
               endpoint = '/addchild';

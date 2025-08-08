@@ -298,3 +298,12 @@ func (s *GameService) BuyAsset(ctx context.Context, code string, req *dto.CardAc
 
 	return nil
 }
+
+func (s *GameService) SellAsset(ctx context.Context, code string, req *dto.CardActionSellReq) error {
+	err := s.playerRepo.SellAsset(req)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

@@ -139,7 +139,6 @@ func (r PlayerRepository) MovePlayer(VKID int, value int) (*models.Player, error
 
 func (r PlayerRepository) BuyAsset(req *dto.CardActionBuyReq) error {
 	return r.db.Transaction(func(tx *gorm.DB) error {
-		// TODO: получить asset
 		asset := &models.Asset{}
 		err := tx.Model(asset).Where("title = ? AND price = ? AND cashflow = ?",
 			req.Title, req.Price, req.Cashflow).First(asset).Error
@@ -147,7 +146,6 @@ func (r PlayerRepository) BuyAsset(req *dto.CardActionBuyReq) error {
 			return fmt.Errorf("error while reading assetID by args: %w", err)
 		}
 
-		// TODO: пересчитываем данные для игрока
 		player := &models.Player{}
 		err = tx.Model(player).Where("vk_id = ?", req.VKID).First(&player).Error
 		if err != nil {
@@ -168,7 +166,6 @@ func (r PlayerRepository) BuyAsset(req *dto.CardActionBuyReq) error {
 			return fmt.Errorf("error while updating player: %w", err)
 		}
 
-		// TODO: добавить запись в players_assets
 		err = tx.Exec(
 			"INSERT INTO players_assets (asset_id, player_id) VALUES (?, ?)",
 			asset.ID,
@@ -176,6 +173,61 @@ func (r PlayerRepository) BuyAsset(req *dto.CardActionBuyReq) error {
 		).Error
 		if err != nil {
 			return fmt.Errorf("error while inserting into players_assets: %w", err)
+		}
+
+		return nil
+	})
+}
+
+func (r PlayerRepository) SellAsset(req *dto.CardActionSellReq) error {
+	return r.db.Transaction(func(tx *gorm.DB) error {
+		player := &models.Player{}
+		if err := tx.Where("vk_id = ?", req.VKID).First(player).Error; err != nil {
+			return fmt.Errorf("error finding player: %w", err)
+		}
+
+		var assetsToSell []models.Asset
+		for _, assetStat := range req.Assets {
+			var asset models.Asset
+			if err := tx.Where("title = ? AND price = ? AND cashflow = ?",
+				assetStat.Title, assetStat.Price, assetStat.Cashflow).First(&asset).Error; err != nil {
+				return fmt.Errorf("error finding asset %s: %w", assetStat.Title, err)
+			}
+
+			var count int64
+			if err := tx.Table("players_assets").
+				Where("player_id = ? AND asset_id = ?", player.ID, asset.ID).
+				Count(&count).Error; err != nil || count == 0 {
+				return fmt.Errorf("player doesn't own asset %s or error checking ownership: %w", assetStat.Title, err)
+			}
+
+			assetsToSell = append(assetsToSell, asset)
+		}
+
+		totalCashflowReduction := 0
+		for _, asset := range assetsToSell {
+			totalCashflowReduction += asset.Cashflow
+		}
+
+		totalIncome := len(req.Assets) * req.SellCost
+		player.Balance += totalIncome
+		player.PassiveIncome -= totalCashflowReduction
+		player.TotalIncome -= totalCashflowReduction
+		player.Cashflow = player.TotalIncome - player.TotalExpenses
+
+		err := tx.Model(player).Where("id = ?", player.ID).Updates(player).Error
+		if err != nil {
+			return fmt.Errorf("error while updating player: %w", err)
+		}
+
+		for _, asset := range assetsToSell {
+			if err := tx.Exec(
+				"DELETE FROM players_assets WHERE player_id = ? AND asset_id = ?",
+				player.ID,
+				asset.ID,
+			).Error; err != nil {
+				return fmt.Errorf("error deleting player_asset relation: %w", err)
+			}
 		}
 
 		return nil
