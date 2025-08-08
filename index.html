@@ -948,6 +948,8 @@
             playPaydaySound();
           }
 
+          console.log(currentPlayer.value)
+
           switch (data.cur_card.type) {
             case 'ASSET':
               currentCardData.value.card = {
@@ -1017,12 +1019,6 @@
             price: asset.price,
             cashflow: asset.cashflow
           }));
-
-
-          console.log("assetsToSell: ", assetsToSell.value)
-          console.log("assetsToSell: ", currentPlayer.value.assets)
-          console.log("assetsToSell: ", assetsToSell)
-
 
           const response = await fetch(`/game/${sessionCode.value}/sell`, {
             method: 'POST',
