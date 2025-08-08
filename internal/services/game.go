@@ -205,6 +205,20 @@ func (s *GameService) RollDice(ctx context.Context, code string, VKID int, value
 
 	resp.IsPayday = player.IsPayday
 
+	assetsDb, err := s.assetRepo.ReadAllByPlayerID(player.ID)
+	if err != nil {
+		return resp, err
+	}
+
+	var assets []dto.AssetStat
+	for _, a := range assetsDb {
+		assets = append(assets, dto.AssetStat{
+			Title:    a.Title,
+			Price:    a.Price,
+			Cashflow: a.Cashflow,
+		})
+	}
+
 	resp.Player = dto.PlayerStat{
 		VKID:          player.VKID,
 		Nickname:      player.Nickname,
@@ -215,6 +229,7 @@ func (s *GameService) RollDice(ctx context.Context, code string, VKID int, value
 		Position:      player.Position,
 		Balance:       player.Balance,
 		BankLoan:      player.BankLoan,
+		Assets:        assets,
 	}
 
 	CardType := chooseCardType()
