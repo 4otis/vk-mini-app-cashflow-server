@@ -356,22 +356,10 @@
 </head>
 <body>
 
-  <!-- <audio id="errorSound" class="audio-element" preload="auto">
-    <source src="audio/error.mp3" type="audio/mpeg">
-    Ваш браузер не поддерживает аудио элемент.
-  </audio>
 
-  <audio id="successSound" class="audio-element" preload="auto">
-    <source src="audio/success.mp3" type="audio/mpeg">
-    Ваш браузер не поддерживает аудио элемент.
-  </audio> -->
-
-  <!-- <audio id="errorSound" class="audio-element" preload="auto">
-    <source src="https://drive.google.com/uc?export=download&id=1EmwuOhGDIhDDxPZ-MnFEUKMfMomjfXTa" type="audio/mpeg">
-  </audio>
-  <audio id="successSound" class="audio-element" preload="auto">
-    <source src="https://drive.google.com/uc?export=download&id=1EmwuOhGDIhDDxPZ-MnFEUKMfMomjfXTa" type="audio/mpeg">
-  </audio> -->
+  <!-- Audio elements -->
+  <audio id="successSound" src="/audio/success.mp3" preload="auto"></audio>
+  <audio id="errorSound" src="/audio/error.mp3" preload="auto"></audio>
 
   <script>
   vkBridge.send("VKWebAppInit", {});
@@ -380,6 +368,9 @@
   <div id="app" :class="{'red-flash': isRedFlash, 'shake': isShaking}">
     <div class="container">
       <h1>Cashflow Game</h1>
+
+      <button @click="showError">error</button>
+      <button @click="playSuccessSound">success</button>
       
       <div v-if="!sessionCode && !showJoinForm">
         <button @click="startNewGame">Начать играть</button>
@@ -609,7 +600,12 @@
       const successSound = ref(null);
       const hasMatchingAssets = computed(() => matchingAssets.value.length > 0);
 
-      onMounted(() => {          
+      onMounted(() => {    
+        errorSound.value = document.getElementById('errorSound');
+        successSound.value = document.getElementById('successSound');
+
+        
+
         if (typeof VK !== 'undefined' && VK.WebApp) {
           isVK.value = true;
           VK.WebApp.init()

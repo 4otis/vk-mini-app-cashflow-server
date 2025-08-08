@@ -27,6 +27,7 @@ func SetupRoutes(g *gin.Engine, db *gorm.DB) {
 
 	g.StaticFile("/", "./index.html")           // Для корневого пути
 	g.StaticFile("/index.html", "./index.html") // Явно для index.html
+	g.Static("/audio", "./audio")
 
 	// Маршруты
 	g.POST("/sessions", sessionHandler.CreateSession)
