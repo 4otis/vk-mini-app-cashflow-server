@@ -922,12 +922,15 @@
             ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
           }
         
+          const playerData = data.players[ourPlayerIndex.value];
           currentPlayer.value = {
-            ...data.players[ourPlayerIndex.value],
-            assets: data.players[ourPlayerIndex.value].assets.map((asset, index) => ({
-              ...asset,
-              id: `${asset.title}_${asset.price}_${asset.cashflow}_${index}` // Комбинированный уникальный ключ
-            }))
+            ...playerData,
+            assets: playerData.assets && Array.isArray(playerData.assets) 
+              ? playerData.assets.map((asset, index) => ({
+                  ...asset,
+                  id: `${asset.title}_${asset.price}_${asset.cashflow}_${index}`
+                }))
+              : [] // Если assets нет или это не массив, используем пустой массив
           };
           gamePlayers.value = data.players;
           isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value;
