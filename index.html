@@ -922,7 +922,13 @@
             ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
           }
         
-          currentPlayer.value = data.players[ourPlayerIndex.value];
+          currentPlayer.value = {
+            ...data.players[ourPlayerIndex.value],
+            assets: data.players[ourPlayerIndex.value].assets.map((asset, index) => ({
+              ...asset,
+              id: `${asset.title}_${asset.price}_${asset.cashflow}_${index}` // Комбинированный уникальный ключ
+            }))
+          };
           gamePlayers.value = data.players;
           isCurrentPlayer.value = data.cur_turn === ourPlayerIndex.value;
         }
@@ -1031,14 +1037,11 @@
         }
       };
       
-      // Метод для показа ошибки с анимацией
       const showError = (message) => {
         errorMessage.value = message;
         isRedFlash.value = true;
         isShaking.value = true;
 
-
-        // Воспроизводим звук ошибки
         if (errorSound.value) {
           errorSound.value.currentTime = 0;
           errorSound.value.play().catch(e => console.log("Audio play error:", e));

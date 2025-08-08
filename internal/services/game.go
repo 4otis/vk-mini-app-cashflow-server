@@ -183,7 +183,7 @@ func (s *GameService) LoadGameState(ctx context.Context, code string) (dto.GameS
 }
 
 func chooseCardType() string {
-	switch repository.RandRange(0, 3) {
+	switch repository.RandRange(0, 2) {
 	case 0:
 		return "ASSET"
 	case 1:
