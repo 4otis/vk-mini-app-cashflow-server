@@ -310,7 +310,7 @@ func (s *GameService) EndTurn(ctx context.Context, code string, VKID int) error 
 	}
 
 	if player.Cashflow > (player.TotalExpenses * 2) {
-		updates["gameover"] = true
+		updates["game_over"] = true
 		updates["winner_vk_id"] = VKID
 	}
 
