@@ -309,7 +309,7 @@ func (s *GameService) EndTurn(ctx context.Context, code string, VKID int) error 
 		return fmt.Errorf("error while reading player: %w", err)
 	}
 
-	if player.Cashflow > (player.TotalExpenses * 2) {
+	if player.PassiveIncome > (player.TotalExpenses * 2) {
 		updates["game_over"] = true
 		updates["winner_vk_id"] = VKID
 	}

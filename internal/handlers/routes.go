@@ -43,6 +43,7 @@ func SetupRoutes(g *gin.Engine, db *gorm.DB) {
 	g.POST("/game/:code/pay", gameHandler.CardActionPay)
 	g.POST("/game/:code/addchild", gameHandler.CardActionChild)
 	g.POST("/game/:code/endturn", gameHandler.EndTurn)
+	g.DELETE("/sessions/:code/delete", sessionHandler.DeleteSession)
 
 	g.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"https://cshflw.ru/*", "https://vk.com"},

@@ -133,6 +133,20 @@ func (s *SessionService) GetSessionPlayers(ctx context.Context, code string) ([]
 	return result, nil
 }
 
+func (s *SessionService) DeleteSession(ctx context.Context, code string) error {
+	session, err := s.sessionRepo.Read(code)
+	if err != nil {
+		return fmt.Errorf("session not found: %w", err)
+	}
+
+	// Достаточно просто удалить сессию - игроки удалятся автоматически
+	if err := s.sessionRepo.Delete(session.ID); err != nil {
+		return fmt.Errorf("failed to delete session: %w", err)
+	}
+
+	return nil
+}
+
 func convertPlayerToDTO(player *models.Player) *dto.PlayerResponse {
 	return &dto.PlayerResponse{
 		ID:            player.ID,

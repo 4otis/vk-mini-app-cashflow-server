@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"errors"
 	"log"
 	"net/http"
 
@@ -90,4 +91,26 @@ func (h *SessionHandler) GetSessionPlayers(c *gin.Context) {
 	}
 
 	c.JSON(http.StatusOK, players)
+}
+
+func (h *SessionHandler) DeleteSession(c *gin.Context) {
+	code := c.Param("code")
+
+	// Удаляем сессию через сервис
+	err := h.sessionService.DeleteSession(c.Request.Context(), code)
+	if err != nil {
+		// Определяем тип ошибки для соответствующего HTTP-статуса
+		switch {
+		case errors.Is(err, services.ErrSessionNotFound):
+			c.JSON(http.StatusNotFound, gin.H{"error": "Сессия не найдена"})
+		default:
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось удалить сессию"})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Сессия успешно удалена",
+		"code":    code,
+	})
 }
