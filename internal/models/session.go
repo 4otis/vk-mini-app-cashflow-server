@@ -8,5 +8,7 @@ type Session struct {
 	Players     []Player `gorm:"foreignKey:SessionID"`
 	IsActive    bool     `gorm:"default:false"`
 	CurrentTurn int
+	GameOver    bool `gorm:"default:false"`
+	WinnerVKID  int  `gorm:"integer;default:0"`
 	// CreatorID   uint
 }

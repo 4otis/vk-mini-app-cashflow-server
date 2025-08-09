@@ -145,6 +145,8 @@ func (s *GameService) LoadGameState(ctx context.Context, code string) (dto.GameS
 
 	response.SessionCode = code
 	response.CurrentTurn = session.CurrentTurn
+	response.GameOver = session.GameOver
+	response.WinnerVKID = session.WinnerVKID
 	response.Players = []dto.PlayerStat{}
 
 	for _, p := range players {
@@ -298,9 +300,21 @@ func (s *GameService) EndTurn(ctx context.Context, code string, VKID int) error 
 	cnt := len(players)
 	newTurn := int(session.CurrentTurn+1) % cnt
 
-	err = s.sessionRepo.UpdateFields(session.ID, map[string]interface{}{
+	updates := map[string]interface{}{
 		"current_turn": newTurn,
-	})
+	}
+
+	player, err := s.playerRepo.ReadByVKID(VKID)
+	if err != nil {
+		return fmt.Errorf("error while reading player: %w", err)
+	}
+
+	if player.Cashflow > (player.TotalExpenses * 2) {
+		updates["gameover"] = true
+		updates["winner_vk_id"] = VKID
+	}
+
+	err = s.sessionRepo.UpdateFields(session.ID, updates)
 	if err != nil {
 		return err
 	}

@@ -104,6 +104,7 @@ func (h *GameHandler) EndTurn(c *gin.Context) {
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 	}
+
 }
 
 func (h *GameHandler) CardActionBuy(c *gin.Context) {

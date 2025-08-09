@@ -382,6 +382,72 @@
     .audio-element {
       display: none;
     }
+
+    .victory-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+      padding: 15px;
+    }
+    
+    .victory-content {
+      background: white;
+      border-radius: 10px;
+      padding: 20px;
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .victory-title {
+      color: #ffd700;
+      font-size: 2rem;
+      margin: 10px 0;
+      text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+    }
+    
+    .winner-avatar {
+      width: 100px;
+      height: 100px;
+      border-radius: 50%;
+      margin: 0 auto;
+      border: 3px solid #ffd700;
+      object-fit: cover;
+    }
+    
+    .winner-name {
+      font-size: 1.5rem;
+      margin: 10px 0;
+      color: #5181b8;
+    }
+    
+    .confetti {
+      position: absolute;
+      width: 10px;
+      height: 10px;
+      background-color: #f00;
+      opacity: 0.8;
+    }
+    
+    @keyframes confetti-fall {
+      0% {
+        transform: translateY(-100px) rotate(0deg);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
   </style>
 </head>
 <body>
@@ -583,7 +649,15 @@
           </div>
         </div>
 
-
+          <div v-if="showVictoryModal" class="victory-overlay">
+            <div class="victory-content">
+              <h2 class="victory-title">ПОБЕДА!</h2>
+              <img :src="winnerAvatar" class="winner-avatar" alt="Победитель">
+              <h3 class="winner-name">{{ winnerName }}</h3>
+              <p>Поздравляем с победой в игре Cashflow!</p>
+              <button @click="closeVictoryModal">Закрыть</button>
+            </div>
+          </div>
       </div>
     </div>
   </div>
@@ -640,6 +714,11 @@
       const sellAssetSound = ref(null);
       const successSound = ref(null);
       const hasMatchingAssets = computed(() => matchingAssets.value.length > 0);
+      const showVictoryModal = ref(false);
+      const winnerName = ref('');
+      const winnerAvatar = ref('');
+      const winnerVKID = ref(null);
+      const gameOver = ref(false);
 
       onMounted(() => {    
         errorSound.value = document.getElementById('errorSound');
@@ -917,6 +996,42 @@
       };
 
       const processGameData = async (data) => {
+        // Проверяем завершение игры
+        if (data.game_over && data.winner_vk_id && !gameOver.value) {
+          gameOver.value = true;
+          winnerVKID.value = data.winner_vk_id;
+          
+          // Находим победителя
+          const winner = data.players.find(p => p.vk_id === data.winner_vk_id);
+          if (winner) {
+            winnerName.value = winner.nickname;
+            
+            // Получаем аватар победителя через VK API
+            if (typeof VK !== 'undefined' && VK.WebApp) {
+              try {
+                const userInfo = await VK.Api.call('users.get', {
+                  user_ids: data.winner_vk_id,
+                  fields: 'photo_200',
+                  v: '5.131'
+                });
+                winnerAvatar.value = userInfo.response[0].photo_200;
+              } catch (e) {
+                console.error('Ошибка получения аватара:', e);
+                winnerAvatar.value = 'https://vk.com/images/camera_200.png';
+              }
+            } else {
+              winnerAvatar.value = 'https://vk.com/images/camera_200.png';
+            }
+            
+            showVictoryModal.value = true;
+            setTimeout(createConfetti, 500); // Запускаем конфетти с небольшой задержкой
+          }
+          
+          // Останавливаем опрос состояния игры
+          stopPollingState();
+          return;
+        }
+
         if (data.players !== null && Array.isArray(data?.players)) {
           if (ourPlayerIndex.value === null) {
             ourPlayerIndex.value = data.players.findIndex(p => p.vk_id === user.value.id);
@@ -1146,7 +1261,28 @@
         showCardModal.value = false;
       };
       
+      // Добавляем метод для создания конфетти
+      const createConfetti = () => {
+        const colors = ['#f00', '#0f0', '#00f', '#ff0', '#f0f', '#0ff'];
+        const container = document.querySelector('.victory-content');
+        
+        for (let i = 0; i < 100; i++) {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti';
+          confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.left = Math.random() * 100 + '%';
+          confetti.style.animation = `confetti-fall ${Math.random() * 3 + 2}s linear forwards`;
+          confetti.style.animationDelay = Math.random() * 2 + 's';
+          container.appendChild(confetti);
+        }
+      };
 
+      // Метод для закрытия победного окна
+      const closeVictoryModal = () => {
+        showVictoryModal.value = false;
+        // Очищаем конфетти
+        document.querySelectorAll('.confetti').forEach(el => el.remove());
+      };
 
       return { 
         sessionCode, players, startNewGame, joinGame, getPlayers, playerReady,

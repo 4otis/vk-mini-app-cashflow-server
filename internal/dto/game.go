@@ -13,6 +13,8 @@ type GameStateResponse struct {
 	SessionCode string       `json:"code"`
 	Players     []PlayerStat `json:"players"`
 	CurrentTurn int          `json:"cur_turn"`
+	GameOver    bool         `json:"game_over"`
+	WinnerVKID  int          `json:"winner_vk_id"`
 	// CurrentCard Card         `json:cur_card`
 	// Phase       GamePhase    `json:"phase"` // "waiting", "rolling", "trading", "end_turn"
 	// Board       []Cell       `json:"board,omitempty"`
