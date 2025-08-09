@@ -1006,7 +1006,7 @@
           if (winner) {
             winnerName.value = winner.nickname;
             
-            const userInfo = vkBridge.send('VKWebAppGetUserInfo', { user_id: winnerVKID.value })
+            const userInfo = vkBridge.send('VKWebAppGetUserInfo', { user_id: winnerVKID.value });
             winnerAvatar.value = userInfo.photo_200;
 
             console.log(userInfo.value)
@@ -1014,7 +1014,7 @@
 
             
             showVictoryModal.value = true;
-            setTimeout(createConfetti, 5000) // Запускаем конфетти с небольшой задержкой
+            setTimeout(createConfetti, 0)
           }
           
           // Останавливаем опрос состояния игры
