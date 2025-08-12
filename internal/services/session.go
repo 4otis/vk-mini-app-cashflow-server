@@ -147,6 +147,20 @@ func (s *SessionService) DeleteSession(ctx context.Context, code string) error {
 	return nil
 }
 
+func (s *SessionService) DeletePlayer(ctx context.Context, VKID int) error {
+	player, err := s.playerRepo.ReadByVKID(VKID)
+	if err != nil {
+		return fmt.Errorf("player not found: %w", err)
+	}
+
+	err = s.playerRepo.Delete(player.ID)
+	if err != nil {
+		return fmt.Errorf("error while deleting player %w", err)
+	}
+
+	return nil
+}
+
 func convertPlayerToDTO(player *models.Player) *dto.PlayerResponse {
 	return &dto.PlayerResponse{
 		ID:            player.ID,

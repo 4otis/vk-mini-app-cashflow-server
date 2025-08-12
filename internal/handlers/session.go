@@ -114,3 +114,21 @@ func (h *SessionHandler) DeleteSession(c *gin.Context) {
 		"code":    code,
 	})
 }
+
+func (h *SessionHandler) DeletePlayer(c *gin.Context) {
+	var req dto.DeletePlayerRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	err := h.sessionService.DeletePlayer(c.Request.Context(), req.VKID)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Не удалось удалить игрока"})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"message": "Игрок успешно удален",
+	})
+}

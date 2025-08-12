@@ -473,7 +473,7 @@
       <div v-if="!sessionCode && !showJoinForm">
         <button @click="startNewGame">Начать играть</button>
         <button class="secondary" @click="showJoinForm = true">Подключиться</button>
-        <button class="secondary" @click="deleteSession">Удалить сессию</button>
+        <button class="secondary" @click="deletePlayer">Выйти из предыдущей сессии</button>
       </div>
       
       <div v-if="showJoinForm && !sessionCode">
@@ -1301,6 +1301,33 @@
       
       };
 
+      const deletePlayer = async () => {
+        try {
+          user.value = await vkBridge.send('VKWebAppGetUserInfo');
+          const response = await fetch(`/player/delete`, {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ 
+              vk_id: user.value.id
+            })
+          });
+
+          if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.message || 'Не удалось удалить игрока');
+          }
+          sessionCode.value = null;
+          
+        } catch (err) {
+          errorMessage.value = err.message;
+          setTimeout(() => {
+            errorMessage.value = '';
+          }, 3000);
+        }
+      };
+
+
+
       return { 
         sessionCode, players, startNewGame, joinGame, getPlayers, playerReady,
         isLoading, errorMessage, showJoinForm, joinCode, joinError,gameStarted,
@@ -1313,7 +1340,7 @@
         isRedFlash, isShaking, matchingAssets, selectedAssets, hasMatchingAssets,
         sellSelectedAssets, showError, playSuccessSound, paydaySound,
         sellAssetSound, playSellAssetSound, playPaydaySound, showVictoryModal,
-        winnerName, winnerAvatar, closeVictoryModal, createConfetti, deleteSession
+        winnerName, winnerAvatar, closeVictoryModal, createConfetti, deleteSession, deletePlayer
       };
     }
   }).mount('#app');

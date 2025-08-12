@@ -34,3 +34,7 @@ type PlayerStat struct {
 	// Liabilities   []Liability `json:"liabilities"`
 	// IsBankrupt    bool        `json:"is_bankrupt"`
 }
+
+type DeletePlayerRequest struct {
+	VKID int `json:"vk_id"`
+}
