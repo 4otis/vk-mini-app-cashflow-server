@@ -1006,7 +1006,7 @@
           if (winner) {
             winnerName.value = winner.nickname;
             
-            const userInfo = vkBridge.send('VKWebAppGetUserInfo', { user_id: winnerVKID.value });
+            const userInfo = vkBridge.send('VKWebAppGetUserInfo');
             winnerAvatar.value = userInfo.photo_200;
 
             console.log(userInfo.value)
