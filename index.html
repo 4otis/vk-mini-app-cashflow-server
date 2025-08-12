@@ -473,6 +473,7 @@
       <div v-if="!sessionCode && !showJoinForm">
         <button @click="startNewGame">Начать играть</button>
         <button class="secondary" @click="showJoinForm = true">Подключиться</button>
+        <button class="secondary" @click="deleteSession">Удалить сессию</button>
       </div>
       
       <div v-if="showJoinForm && !sessionCode">
@@ -1274,6 +1275,12 @@
         document.querySelectorAll('.confetti').forEach(el => el.remove());
         gameStarted.value = false;
 
+        deleteSession();
+      };
+
+
+
+      const deleteSession = async () => {
         try {
           const response = await fetch(`/sessions/${sessionCode.value}/delete`, {
             method: 'DELETE'
@@ -1291,6 +1298,7 @@
             errorMessage.value = '';
           }, 3000);
         }
+      
       };
 
       return { 
@@ -1305,7 +1313,7 @@
         isRedFlash, isShaking, matchingAssets, selectedAssets, hasMatchingAssets,
         sellSelectedAssets, showError, playSuccessSound, paydaySound,
         sellAssetSound, playSellAssetSound, playPaydaySound, showVictoryModal,
-        winnerName, winnerAvatar, closeVictoryModal, createConfetti
+        winnerName, winnerAvatar, closeVictoryModal, createConfetti, deleteSession
       };
     }
   }).mount('#app');
