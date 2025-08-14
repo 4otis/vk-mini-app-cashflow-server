@@ -4,7 +4,7 @@ import "gorm.io/gorm"
 
 type Player struct {
 	gorm.Model
-	VKID          int    `gorm:"uniqueIndex:idx_vkid_session;not null" json:"vk_id"`
+	VKID          int    `gorm:"uniqueIndex:idx_vkid_session,where:deleted_at IS NULL;not null" json:"vk_id"`
 	SessionID     uint   `gorm:"index;not null" json:"session_id"`
 	Nickname      string `gorm:"size:50;not null" json:"nickname"`
 	Ready         bool   `gorm:"default:false" json:"ready"`
